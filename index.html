@@ -1,177 +1,40 @@
-<script>
-    // 你的 LIFF ID
-    const MY_LIFF_ID = "2008939051-CMBzqbtq";
-
-    // 最終版 25 個地點 (包含屏山國小、壽卡、烏來瀑布等)
-    const locations = [
-        // --- 第一排：河濱輕鬆騎 (北區/淡水河) ---
-        { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵" },
-        { id: 2, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊" },
-        { id: 3, region: "關渡", name: "關渡宮", lat: 25.1192, lng: 121.4673, icon: "🙏" },
-        { id: 4, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪" },
-        { id: 5, region: "八里", name: "左岸公園", lat: 25.1614, lng: 121.4335, icon: "🚲" },
-
-        // --- 第二排：河濱與人文 (西區/大漢溪) ---
-        { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️" },
-        { id: 7, region: "新月橋", name: "透明步道", lat: 25.0348, lng: 121.4506, icon: "🌉" },
-        { id: 8, region: "樹林", name: "山佳火車站", lat: 24.9734, lng: 121.3978, icon: "🚂" },
-        { id: 9, region: "鶯歌", name: "龍窯橋", lat: 24.9537, lng: 121.3532, icon: "🐉" },
-        { id: 10, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺" },
-
-        // --- 第三排：貓空與深坑 (南區/丘陵) ---
-        { id: 11, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳" },
-        { id: 12, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼" },
-        { id: 13, region: "深坑", name: "大茄冬樹", lat: 25.0017, lng: 121.6147, icon: "🌳" },
-        { id: 14, region: "貓空", name: "明德宮", lat: 24.9658, lng: 121.5885, icon: "⛩️" },
-        { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
-
-        // --- 第四排：勇腳練坡區 (山路挑戰) ---
-        { id: 16, region: "三峽", name: "清水祖師廟", lat: 24.9338, lng: 121.3703, icon: "⛩️" },
-        { id: 17, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
-        { id: 18, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
-        { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
-        { id: 20, region: "萬里", name: "風櫃嘴涼亭", lat: 25.1352, lng: 121.6026, icon: "⛰️" },
-
-        // --- 第五排：魔王與秘境 (長距離/高難度) ---
-        { id: 21, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕" },
-        { id: 22, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊" },
-        { id: 23, region: "福山", name: "馬岸餐廳", lat: 24.7746, lng: 121.5007, icon: "🥢" },
-        { id: 24, region: "高雄", name: "屏山國小", lat: 22.6908, lng: 120.3015, icon: "🏫" },
-        { id: 25, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑" }
-    ];
-
-    let savedState = JSON.parse(localStorage.getItem('bingoState_nccu_2026')) || [];
-    const grid = document.getElementById('bingo-grid');
-    const statusText = document.getElementById('status-text');
-    let clickCounts = {};
-
-    function init() {
-        grid.innerHTML = "";
-        locations.forEach(loc => {
-            let cell = document.createElement('div');
-            const isActive = savedState.includes(loc.id);
-            cell.className = 'cell ' + (isActive ? 'active' : '');
-            cell.innerHTML = `
-                <div class="region">${loc.region}</div>
-                <div class="icon">${loc.icon}</div>
-                <div class="name">${loc.name}</div>
-            `;
-            
-            // Debug: 連點 5 下切換狀態 (打卡 / 取消)
-            cell.onclick = () => {
-                // 移除這裡原本的 if(isActive) return; 讓已打卡的也可以被點擊
-                clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
-                
-                if(clickCounts[loc.id] >= 5) {
-                    if (isActive) {
-                        // 如果已經亮燈 -> 取消打卡
-                        savedState = savedState.filter(id => id !== loc.id);
-                        alert(`❌ 已取消：${loc.name}`);
-                    } else {
-                        // 如果還沒亮燈 -> 強制打卡
-                        savedState.push(loc.id);
-                        alert(`🎉 強制打卡：${loc.name}`);
-                    }
-                    
-                    // 存檔並重繪
-                    localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
-                    clickCounts[loc.id] = 0; // 重置計數
-                    init();
-                }
-            };
-            grid.appendChild(cell);
-        });
-        checkBingo();
-        document.getElementById('loading').style.opacity = 0;
-        setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  var userId = data.userId;
+  var name = data.name;
+  var points = data.points; // 完成總格數
+  var lines = data.lines;   // 完成連線數
+  
+  // 新增：接收前端傳來的詳細地點清單 (例如 "1, 5, 25")
+  // 如果前端還沒傳這個欄位，就預設空白
+  var visitedList = data.visitedIds ? data.visitedIds.join(", ") : ""; 
+  
+  var rows = sheet.getDataRange().getValues();
+  var rowIndex = -1;
+  
+  // 搜尋舊用戶
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] == userId) {
+      rowIndex = i + 1;
+      break;
     }
-
-    function markVisited(id, isManual) {
-        if (!savedState.includes(id)) {
-            savedState.push(id);
-            localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
-            init();
-            if(!isManual) {
-                const locName = locations.find(x=>x.id===id).name;
-                alert(`🎉 打卡成功！\n${locName}`);
-            }
-        }
-    }
-
-    function checkLocation() {
-        statusText.innerHTML = "🛰️ 衛星定位中...<br><span style='font-size:9px'>請保持在室外</span>";
-        if (!navigator.geolocation) {
-            alert("錯誤：你的裝置不支援 GPS");
-            return;
-        }
-        navigator.geolocation.getCurrentPosition(position => {
-            const userLat = position.coords.latitude;
-            const userLng = position.coords.longitude;
-            let found = false;
-
-            statusText.innerHTML = `📍 經:${userLng.toFixed(3)} 緯:${userLat.toFixed(3)}<br><span style='font-size:9px'>誤差範圍: 500m</span>`;
-
-            locations.forEach(loc => {
-                if(savedState.includes(loc.id)) return;
-                
-                const dist = getDistanceFromLatLonInKm(userLat, userLng, loc.lat, loc.lng);
-                if (dist < 0.5) { 
-                    markVisited(loc.id, false);
-                    found = true;
-                }
-            });
-
-            if(!found) {
-                alert("❌ 打卡失敗\n附近沒有賓果點 (誤差範圍 500m)\n再靠近一點試試看！");
-            }
-        }, error => {
-            statusText.innerHTML = "❌ 定位失敗<br><span style='font-size:9px'>請檢查 GPS 權限</span>";
-            alert("請允許網頁使用位置權限，並確認手機 GPS 已開啟。");
-        }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
-    }
-
-    function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-        var R = 6371; 
-        var dLat = deg2rad(lat2-lat1); 
-        var dLon = deg2rad(lon2-lon1); 
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-        return R * c;
-    }
-    function deg2rad(deg) { return deg * (Math.PI/180); }
-
-    function checkBingo() {
-        const lines = [
-            [1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15], [16,17,18,19,20], [21,22,23,24,25], 
-            [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], [5,10,15,20,25], 
-            [1,7,13,19,25], [5,9,13,17,21] 
-        ];
-        let winCount = 0;
-        lines.forEach(line => {
-            if (line.every(id => savedState.includes(id))) winCount++;
-        });
-
-        if (winCount >= 5) {
-            document.getElementById('winner-overlay').style.display = 'flex';
-        } else {
-            document.getElementById('winner-overlay').style.display = 'none';
-        }
-    }
-    function closeWinner() { document.getElementById('winner-overlay').style.display = 'none'; }
-
-    async function main() {
-        try {
-            await liff.init({ liffId: MY_LIFF_ID });
-            if (liff.isLoggedIn()) {
-                const profile = await liff.getProfile();
-                document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
-            }
-        } catch (err) {
-            console.error("LIFF Init Failed", err);
-            document.getElementById('user-name').innerText = " (訪客模式)";
-        }
-        init();
-    }
-    main();
-</script>
+  }
+  
+  var timestamp = new Date(); 
+  
+  if (rowIndex > 0) {
+    // 舊用戶：更新分數與詳細清單
+    sheet.getRange(rowIndex, 2).setValue(name);
+    sheet.getRange(rowIndex, 3).setValue(points);
+    sheet.getRange(rowIndex, 4).setValue(lines);
+    sheet.getRange(rowIndex, 5).setValue(timestamp);
+    sheet.getRange(rowIndex, 6).setValue(visitedList); // 更新 F 欄 (已完成地點)
+  } else {
+    // 新用戶：新增一行
+    sheet.appendRow([userId, name, points, lines, timestamp, visitedList]);
+  }
+  
+  return ContentService.createTextOutput("Success");
+}
