@@ -1,42 +1,36 @@
-    // 25 個地點資料 (修正版：精準定位政大清境)
-    const locations = [
-        // --- 第一排 ---
-        { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵" },
-        { id: 2, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊" },
-        { id: 3, region: "關渡", name: "關渡宮", lat: 25.1192, lng: 121.4673, icon: "🙏" },
-        { id: 4, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪" },
-        { id: 5, region: "八里", name: "左岸公園", lat: 25.1614, lng: 121.4335, icon: "🚲" },
-
-        // --- 第二排 ---
-        { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️" },
-        { id: 7, region: "新月橋", name: "透明步道", lat: 25.0348, lng: 121.4506, icon: "🌉" },
-        { id: 8, region: "樹林", name: "山佳火車站", lat: 24.9734, lng: 121.3978, icon: "🚂" },
-        { id: 9, region: "鶯歌", name: "龍窯橋", lat: 24.9537, lng: 121.3532, icon: "🐉" },
-        { id: 10, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺" },
-
-        // --- 第三排 ---
-        // 修正：這是山下的「政大校門口」
-        { id: 11, region: "文山", name: "政治大學", lat: 24.9868, lng: 121.5762, icon: "🎓" }, 
-        { id: 12, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼" },
-        { id: 13, region: "深坑", name: "大茄冬樹", lat: 25.0017, lng: 121.6147, icon: "🌳" },
-        { id: 14, region: "貓空", name: "明德宮", lat: 24.9658, lng: 121.5885, icon: "⛩️" },
-        { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
-
-        // --- 第四排 ---
-        { id: 16, region: "三峽", name: "清水祖師廟", lat: 24.9338, lng: 121.3703, icon: "⛩️" },
-        { id: 17, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
-        { id: 18, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
-        { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
-        { id: 20, region: "萬里", name: "風櫃嘴涼亭", lat: 25.1352, lng: 121.6026, icon: "⛰️" },
-
-        // --- 第五排 ---
-        { id: 21, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕" },
-        { id: 22, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊" },
-        { id: 23, region: "福山", name: "馬岸餐廳", lat: 24.7746, lng: 121.5007, icon: "🥢" },
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <title>政大EMBA單車社賓果挑戰</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        /* 基礎設定 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "Segoe UI", Roboto, sans-serif; 
+            background: #fdf5e6; 
+            text-align: center; 
+            margin: 0; 
+            padding: 20px 10px 100px 10px; 
+            -webkit-tap-highlight-color: transparent;
+        }
         
-        // 修正：這格顯示「屏山國小」，但座標改成您現在的「政大清境」
-        { id: 24, region: "高雄(?)", name: "屏山國小", lat: 24.9880, lng: 121.5870, icon: "🏫" }, 
-        
-        // 華山 Allycat's
-        { id: 25, region: "中正", name: "華山 Allycat's", lat: 25.0441, lng: 121.5294, icon: "🍕" } 
-    ];
+        h1 { color: #b71c1c; margin: 10px 0 5px 0; font-size: 1.8em; letter-spacing: 1px; font-weight: 800; }
+        .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
+        .user-greeting { color: #b71c1c; font-weight: bold; }
+        .version-tag { font-size: 10px; color: #aaa; margin-top: -20px; margin-bottom: 20px; display: block;}
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .cell {
