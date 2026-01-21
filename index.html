@@ -154,6 +154,16 @@
     // 你的 Google Apps Script URL (後端資料庫)
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
 
+    // --- 安全機制：3秒後強制關閉載入畫面 (避免卡死) ---
+    setTimeout(() => {
+        const loader = document.getElementById('loading');
+        if(loader && loader.style.display !== 'none') {
+            loader.style.opacity = 0;
+            setTimeout(() => loader.style.display = 'none', 500);
+            console.log("強制關閉載入遮罩");
+        }
+    }, 3000);
+
     // 25 個地點資料 (最終版)
     const locations = [
         // --- 第一排：河濱輕鬆騎 (北區/淡水河) ---
@@ -234,6 +244,8 @@
             grid.appendChild(cell);
         });
         checkBingo();
+        
+        // 如果 LIFF 已載入完畢，這裡也會執行一次確保關閉遮罩
         document.getElementById('loading').style.opacity = 0;
         setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
     }
@@ -316,4 +328,48 @@
     function closeWinner() { document.getElementById('winner-overlay').style.display = 'none'; }
 
     // 同步資料到 Google Sheets (包含已完成的地點)
-    function syncToGoogleSheet()
+    function syncToGoogleSheet() {
+        if (!liff.isLoggedIn()) return;
+        
+        liff.getProfile().then(profile => {
+            const points = savedState.length;
+            const lines = checkBingo();
+
+            const payload = {
+                userId: profile.userId,
+                name: profile.displayName,
+                points: points,
+                lines: lines,
+                visitedIds: savedState // 傳送詳細地點資料
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                console.log("資料同步發送成功");
+            }).catch(err => {
+                console.error("同步失敗", err);
+            });
+        });
+    }
+
+    async function main() {
+        try {
+            await liff.init({ liffId: MY_LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
+            }
+        } catch (err) {
+            console.error("LIFF Init Failed", err);
+            document.getElementById('user-name').innerText = " (訪客模式)";
+        }
+        init();
+    }
+    main();
+</script>
+</body>
+</html>
