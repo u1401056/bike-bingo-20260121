@@ -73,8 +73,7 @@
         
         /* 打卡次數標籤 */
         .count-badge {
-            position: absolute;
-            bottom: 2px; right: 2px;
+            position: absolute; bottom: 2px; right: 2px;
             background: #fff; color: #b71c1c;
             font-size: 9px; font-weight: 800;
             padding: 1px 4px; border-radius: 4px;
@@ -151,12 +150,11 @@
     </div>
     
     <p style="color:#ccc; font-size:10px; margin-top:40px;">
-        Debug模式：點擊格子 5 次可增加次數 (+1)<br>
+        Debug模式：點擊格子 5 次可增加/刪除紀錄<br>
         資料將自動同步至雲端
     </p>
-    <button id="reset-btn" style="display:none; margin-top:20px; background:#666; color:white; border:none; padding:5px 10px;">⚠️ 重置所有紀錄</button>
 
-    <div class="version-tag">v2026.01.23 SafeMode</div>
+    <div class="version-tag">v2026.01.23 Clean</div>
 
     <div id="winner-overlay">
         <h2>BINGO!</h2>
@@ -169,7 +167,7 @@
     const MY_LIFF_ID = "2008939051-CMBzqbtq";
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
 
-    // 25 個地點 (打散順序 + 真實座標)
+    // 25 個地點
     const locations = [
         // Row 1
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵" },
@@ -222,7 +220,6 @@
             const count = visitCounts[loc.id] || 0;
             
             cell.className = 'cell ' + (isActive ? 'active' : '');
-            
             const badgeHtml = count > 0 ? `<div class="count-badge">x${count}</div>` : '';
             const debugHtml = `<div class="debug-click-indicator" id="debug-${loc.id}"></div>`;
 
@@ -238,9 +235,24 @@
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 const dIcon = document.getElementById(`debug-${loc.id}`);
                 dIcon.style.display = 'block';
+                
                 if(clickCounts[loc.id] >= 5) {
                     dIcon.style.background = 'red';
-                    markVisited(loc.id, true);
+                    
+                    // 單點移除邏輯
+                    if(visitCounts[loc.id] > 0) {
+                         if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除此紀錄)\n按「取消」 = 增加次數 (+1)`)) {
+                             // 歸零
+                             visitCounts[loc.id] = 0;
+                             savedState = savedState.filter(x => x !== loc.id);
+                             saveAndReload(true); 
+                         } else {
+                             // 增加
+                             markVisited(loc.id, true);
+                         }
+                    } else {
+                        markVisited(loc.id, true);
+                    }
                     clickCounts[loc.id] = 0; 
                 }
                 setTimeout(()=> dIcon.style.display = 'none', 1000);
@@ -253,17 +265,20 @@
     function markVisited(id, isManual) {
         visitCounts[id] = (visitCounts[id] || 0) + 1;
         if (!savedState.includes(id)) savedState.push(id);
-        
+        saveAndReload(false, isManual ? null : id);
+    }
+    
+    function saveAndReload(isRemove, alertId) {
         localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
         localStorage.setItem('bingoCounts_nccu_2026', JSON.stringify(visitCounts));
-        
         init();
-        if(!isManual) {
-            const locName = locations.find(x=>x.id===id).name;
-            const currentCount = visitCounts[id];
+        
+        if(alertId) {
+            const locName = locations.find(x=>x.id===alertId).name;
+            const currentCount = visitCounts[alertId];
             alert(`🎉 打卡成功！\n${locName}\n(目前累積: ${currentCount} 次)`);
         }
-        syncToGoogleSheet();
+        if(!isRemove) syncToGoogleSheet();
     }
 
     function checkLocation() {
@@ -346,20 +361,6 @@
             }).catch(console.error);
         });
     }
-
-    // 清除按鈕邏輯
-    let debugTextClick = 0;
-    document.querySelector('p[style*="color:#ccc"]').onclick = function() {
-        debugTextClick++;
-        if(debugTextClick >= 10) {
-            if(confirm("確定要重置所有紀錄嗎？(次數將歸零)")) {
-                localStorage.removeItem('bingoState_nccu_2026');
-                localStorage.removeItem('bingoCounts_nccu_2026');
-                location.reload();
-            }
-            debugTextClick = 0;
-        }
-    };
 
     async function main() {
         try {
