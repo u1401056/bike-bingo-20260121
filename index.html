@@ -12,16 +12,14 @@
             background: #fdf5e6; 
             text-align: center; 
             margin: 0; 
-            padding: 20px 10px 100px 10px; /* 底部留白給按鈕 */
+            padding: 20px 10px 100px 10px; 
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* 標題區 */
         h1 { color: #b71c1c; margin: 10px 0 5px 0; font-size: 1.8em; letter-spacing: 1px; font-weight: 800; }
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
 
-        /* 賓果盤面 - 響應式設計 */
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -31,7 +29,7 @@
         }
 
         .cell {
-            aspect-ratio: 1/1; /* 強制正方形 */
+            aspect-ratio: 1/1; 
             background: white;
             border: 1.5px solid #b71c1c;
             border-radius: 8px;
@@ -50,7 +48,6 @@
         
         .cell:active { transform: scale(0.95); }
 
-        /* 打卡成功的樣式 */
         .cell.active {
             background: #b71c1c;
             color: white;
@@ -58,20 +55,17 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
         }
         
-        /* 格子內的文字與圖示 */
         .icon { font-size: 18px; margin-bottom: 2px; line-height: 1; }
         .region { font-size: 10px; color: #888; margin-bottom: 2px; transform: scale(0.9); }
         .cell.active .region { color: #ffcccc; }
         .name { font-weight: bold; line-height: 1.1; font-size: 10px; width: 100%; word-break: break-all; }
         
-        /* 小螢幕適配 */
         @media (max-width: 360px) {
             .name { font-size: 9px; transform: scale(0.95); }
             .icon { font-size: 14px; }
             .grid { gap: 3px; }
         }
 
-        /* 底部浮動按鈕區 */
         .bottom-bar {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.95);
@@ -94,7 +88,6 @@
         }
         .btn:active { transform: scale(0.95); }
 
-        /* 獲勝全螢幕特效 */
         #winner-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(183, 28, 28, 0.95); color: white; flex-direction: column;
@@ -106,7 +99,6 @@
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* 載入中遮罩 */
         #loading { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:99999; display:flex; justify-content:center; align-items:center; transition: opacity 0.5s; flex-direction: column;}
         #loading p { margin-top: 10px; color: #999; font-size: 12px; }
     </style>
@@ -125,8 +117,7 @@
         <span id="user-name" class="user-greeting"></span> 
     </div>
 
-    <div class="grid" id="bingo-grid">
-        </div>
+    <div class="grid" id="bingo-grid"></div>
 
     <div class="bottom-bar">
         <div class="status-text" id="status-text">
@@ -149,12 +140,10 @@
     </div>
 
 <script>
-    // 你的 LIFF ID
     const MY_LIFF_ID = "2008939051-CMBzqbtq";
-    // 你的 Google Apps Script URL (後端資料庫)
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
 
-    // --- 安全機制：3秒後強制關閉載入畫面 (避免卡死) ---
+    // 安全機制：3秒後強制關閉載入畫面
     setTimeout(() => {
         const loader = document.getElementById('loading');
         if(loader && loader.style.display !== 'none') {
@@ -164,42 +153,44 @@
         }
     }, 3000);
 
-    // 25 個地點資料 (最終版)
+    // 25 個地點資料 (已修改：政大、清境、華山Allycat's)
     const locations = [
-        // --- 第一排：河濱輕鬆騎 (北區/淡水河) ---
+        // --- 第一排 ---
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵" },
         { id: 2, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊" },
         { id: 3, region: "關渡", name: "關渡宮", lat: 25.1192, lng: 121.4673, icon: "🙏" },
         { id: 4, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪" },
         { id: 5, region: "八里", name: "左岸公園", lat: 25.1614, lng: 121.4335, icon: "🚲" },
 
-        // --- 第二排：河濱與人文 (西區/大漢溪) ---
+        // --- 第二排 ---
         { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️" },
         { id: 7, region: "新月橋", name: "透明步道", lat: 25.0348, lng: 121.4506, icon: "🌉" },
         { id: 8, region: "樹林", name: "山佳火車站", lat: 24.9734, lng: 121.3978, icon: "🚂" },
         { id: 9, region: "鶯歌", name: "龍窯橋", lat: 24.9537, lng: 121.3532, icon: "🐉" },
         { id: 10, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺" },
 
-        // --- 第三排：貓空與深坑 (南區/丘陵) ---
-        { id: 11, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳" },
+        // --- 第三排 (已修改 ID 11) ---
+        { id: 11, region: "文山", name: "政治大學", lat: 24.9868, lng: 121.5762, icon: "🎓" }, // 改為政大
         { id: 12, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼" },
         { id: 13, region: "深坑", name: "大茄冬樹", lat: 25.0017, lng: 121.6147, icon: "🌳" },
         { id: 14, region: "貓空", name: "明德宮", lat: 24.9658, lng: 121.5885, icon: "⛩️" },
         { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
 
-        // --- 第四排：勇腳練坡區 (山路挑戰) ---
+        // --- 第四排 ---
         { id: 16, region: "三峽", name: "清水祖師廟", lat: 24.9338, lng: 121.3703, icon: "⛩️" },
         { id: 17, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
         { id: 18, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
         { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
         { id: 20, region: "萬里", name: "風櫃嘴涼亭", lat: 25.1352, lng: 121.6026, icon: "⛰️" },
 
-        // --- 第五排：魔王與秘境 (長距離/高難度) ---
+        // --- 第五排 (已修改 ID 24, 25) ---
         { id: 21, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕" },
         { id: 22, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊" },
         { id: 23, region: "福山", name: "馬岸餐廳", lat: 24.7746, lng: 121.5007, icon: "🥢" },
-        { id: 24, region: "高雄", name: "屏山國小", lat: 22.6908, lng: 120.3015, icon: "🏫" },
-        { id: 25, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑" }
+        // 顯示名屏山，座標政大清境
+        { id: 24, region: "高雄(?)", name: "屏山國小", lat: 24.9825, lng: 121.5785, icon: "🏫" }, 
+        // 顯示名Allycat's，座標華山
+        { id: 25, region: "中正", name: "華山 Allycat's", lat: 25.0441, lng: 121.5294, icon: "🍕" } 
     ];
 
     let savedState = JSON.parse(localStorage.getItem('bingoState_nccu_2026')) || [];
@@ -219,33 +210,26 @@
                 <div class="name">${loc.name}</div>
             `;
             
-            // Debug: 連點 5 下切換狀態 (打卡 / 取消)
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 
                 if(clickCounts[loc.id] >= 5) {
                     if (isActive) {
-                        // 取消打卡
                         savedState = savedState.filter(id => id !== loc.id);
                         alert(`❌ 已取消：${loc.name}`);
                     } else {
-                        // 強制打卡
                         savedState.push(loc.id);
                         alert(`🎉 強制打卡：${loc.name}`);
                     }
-                    
-                    // 存檔、重繪、並同步到雲端
                     localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
                     clickCounts[loc.id] = 0; 
                     init();
-                    syncToGoogleSheet(); // 同步更新狀態
+                    syncToGoogleSheet();
                 }
             };
             grid.appendChild(cell);
         });
         checkBingo();
-        
-        // 如果 LIFF 已載入完畢，這裡也會執行一次確保關閉遮罩
         document.getElementById('loading').style.opacity = 0;
         setTimeout(() => document.getElementById('loading').style.display = 'none', 500);
     }
@@ -259,7 +243,7 @@
                 const locName = locations.find(x=>x.id===id).name;
                 alert(`🎉 打卡成功！\n${locName}`);
             }
-            syncToGoogleSheet(); // 打卡成功時同步
+            syncToGoogleSheet();
         }
     }
 
@@ -322,37 +306,26 @@
         } else {
             document.getElementById('winner-overlay').style.display = 'none';
         }
-        
-        return winCount; // 回傳連線數
+        return winCount;
     }
     function closeWinner() { document.getElementById('winner-overlay').style.display = 'none'; }
 
-    // 同步資料到 Google Sheets (包含已完成的地點)
     function syncToGoogleSheet() {
         if (!liff.isLoggedIn()) return;
-        
         liff.getProfile().then(profile => {
-            const points = savedState.length;
-            const lines = checkBingo();
-
             const payload = {
                 userId: profile.userId,
                 name: profile.displayName,
-                points: points,
-                lines: lines,
-                visitedIds: savedState // 傳送詳細地點資料
+                points: savedState.length,
+                lines: checkBingo(),
+                visitedIds: savedState
             };
-
             fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            }).then(() => {
-                console.log("資料同步發送成功");
-            }).catch(err => {
-                console.error("同步失敗", err);
-            });
+            }).catch(console.error);
         });
     }
 
@@ -364,8 +337,7 @@
                 document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
             }
         } catch (err) {
-            console.error("LIFF Init Failed", err);
-            document.getElementById('user-name').innerText = " (訪客模式)";
+            console.error(err);
         }
         init();
     }
