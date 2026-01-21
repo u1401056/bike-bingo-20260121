@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 新店騎車團賓果挑戰</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: "微軟正黑體", sans-serif; background: #fdf5e6; text-align: center; margin: 0; padding: 20px; }
+        h1 { color: #b71c1c; margin-bottom: 5px; font-size: 1.5em; }
+        .sub-title { color: #555; font-size: 0.9em; margin-bottom: 20px; }
+        
+        /* 賓果盤面 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            background: white;
+            border: 2px solid #b71c1c;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            padding: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .cell.active {
+            background: #b71c1c;
+            color: white;
+            box-shadow: 0 0 10px rgba(183, 28, 28, 0.5);
+        }
+
+        .icon { font-size: 16px; margin-bottom: 2px; }
+        .name { font-weight: bold; line-height: 1.2; }
+        
+        /* 狀態列 */
+        #status { margin-top: 20px; padding: 10px; background: #fff; border-radius: 50px; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn { background: #333; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin-top: 20px; cursor: pointer; }
+        
+        /* 獲勝特效 */
+        #winner-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); color: gold; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 999;
+        }
+        #winner-overlay h2 { font-size: 3em; margin: 0; text-shadow: 0 0 20px red; }
+    </style>
+</head>
+<body>
+
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" width="40" style="margin-bottom:10px;">
+    <h1>2026 新店騎車團賓果</h1>
+    <p class="sub-title">目標：連成五條線即完成挑戰！</p>
+
+    <div class="grid" id="bingo-grid">
+        </div>
+
+    <div id="status">📍 GPS 定位中...</div>
+    
+    <br>
+    <button class="btn" onclick="checkLocation()">🔄 我到了！手動打卡</button>
+    <p style="color:#999; font-size:10px; margin-top:30px;">測試模式：點擊格子 5 次可強制手動亮燈</p>
+
+    <div id="winner-overlay">
+        <h2>BINGO!</h2>
+        <p>恭喜完成挑戰！</p>
+        <button class="btn" onclick="closeWinner()">太神啦</button>
+    </div>
+
+<script>
+    // 這裡填入第一排的真實座標 (其他的我先用 0,0 代替，之後補上)
+    const locations = [
+        { id: 1, name: "台南\n旗哥牛肉湯", lat: 23.009935, lng: 120.185494, icon: "🍲" },
+        { id: 2, name: "復興\n美腿山咖啡", lat: 24.800184, lng: 121.312536, icon: "☕" },
+        { id: 3, name: "宜蘭\n明池山莊", lat: 24.650600, lng: 121.473000, icon: "🌲" },
+        { id: 4, name: "福山\n馬岸餐廳", lat: 24.774638, lng: 121.500699, icon: "🍲" },
+        { id: 5, name: "嘉義\n阿婆灣", lat: 23.361760, lng: 120.580500, icon: "🏪" },
+        // ... (第6-25格先用假資料，避免版面壞掉)
+        ...Array.from({length: 20}, (_, i) => ({ id: i+6, name: `第${i+6}格\n待補座標`, lat: 0, lng: 0, icon: "🚩" }))
+    ];
+
+    // 讀取紀錄
+    let savedState = JSON.parse(localStorage.getItem('bingoState')) || [];
+
+    const grid = document.getElementById('bingo-grid');
+    const statusDiv = document.getElementById('status');
+    let clickCounts = {}; // 用於測試模式的計數器
+
+    // 初始化畫面
+    function init() {
+        grid.innerHTML = "";
+        locations.forEach(loc => {
+            let cell = document.createElement('div');
+            cell.className = 'cell ' + (savedState.includes(loc.id) ? 'active' : '');
+            cell.innerHTML = `<div class="icon">${loc.icon}</div><div class="name">${loc.name.replace('\n','<br>')}</div>`;
+            
+            // 測試模式：連續點擊 5 次可以強制亮燈
+            cell.onclick = () => {
+                clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
+                if(clickCounts[loc.id] >= 5) {
+                    markVisited(loc.id);
+                    clickCounts[loc.id] = 0;
+                }
+            };
+            
+            grid.appendChild(cell);
+        });
+        checkBingo(); // 檢查是否連線
+    }
+
+    // 標記完成
+    function markVisited(id) {
+        if (!savedState.includes(id)) {
+            savedState.push(id);
+            localStorage.setItem('bingoState', JSON.stringify(savedState));
+            init(); // 重繪
+            alert(`打卡成功！地點 ID: ${id}`);
+        }
+    }
+
+    // 檢查 GPS
+    function checkLocation() {
+        statusDiv.innerText = "🛰️ 正在搜尋衛星...";
+        if (!navigator.geolocation) {
+            alert("你的瀏覽器不支援 GPS");
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(position => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            let found = false;
+
+            statusDiv.innerText = `📍 目前位置：${userLat.toFixed(4)}, ${userLng.toFixed(4)}`;
+
+            locations.forEach(loc => {
+                // 如果已經打過卡就不算了
+                if(savedState.includes(loc.id)) return;
+
+                // 計算距離 (單位：公里)
+                const dist = getDistanceFromLatLonInKm(userLat, userLng, loc.lat, loc.lng);
+                
+                // 判定範圍：500公尺 (0.5km)
+                if (dist < 0.5) { 
+                    markVisited(loc.id);
+                    found = true;
+                }
+            });
+
+            if(!found) {
+                // alert("附近沒有賓果點喔！再靠近一點試試看。");
+            }
+        }, error => {
+            statusDiv.innerText = "❌ 無法取得位置";
+            alert("請允許網頁存取 GPS 位置");
+        });
+    }
+
+    // 計算地球兩點距離公式 (Haversine formula)
+    function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+        var R = 6371; 
+        var dLat = deg2rad(lat2-lat1); 
+        var dLon = deg2rad(lon2-lon1); 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        return R * c;
+    }
+    function deg2rad(deg) { return deg * (Math.PI/180); }
+
+    // 賓果連線判定邏輯
+    function checkBingo() {
+        const lines = [
+            [1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15], [16,17,18,19,20], [21,22,23,24,25], // 橫線
+            [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], [5,10,15,20,25], // 直線
+            [1,7,13,19,25], [5,9,13,17,21] // 對角線
+        ];
+        
+        let winCount = 0;
+        lines.forEach(line => {
+            if (line.every(id => savedState.includes(id))) winCount++;
+        });
+
+        if (winCount >= 5) {
+            document.getElementById('winner-overlay').style.display = 'flex';
+        }
+    }
+
+    function closeWinner() {
+        document.getElementById('winner-overlay').style.display = 'none';
+    }
+
+    // 啟動 LINE LIFF (選用)
+    async function main() {
+        await liff.init({ liffId: "YOUR_LIFF_ID_HERE" }).catch(err => console.log(err));
+        if(liff.isLoggedIn()){
+             // 可以在這裡取得使用者名字
+        }
+        init();
+    }
+    main();
+
+</script>
+</body>
+</html>
