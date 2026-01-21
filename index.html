@@ -16,7 +16,7 @@
             background: #fdf5e6; 
             text-align: center; 
             margin: 0; 
-            padding: 20px 10px 100px 10px; 
+            padding: 20px 10px 120px 10px; 
             -webkit-tap-highlight-color: transparent;
             min-height: 100vh;
         }
@@ -25,7 +25,6 @@
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
         
-        /* 版本號 */
         .version-tag { 
             position: fixed; bottom: 5px; right: 5px; 
             font-size: 9px; color: #ccc; z-index: 50;
@@ -71,7 +70,6 @@
         .cell.active .region { color: #ffcccc; }
         .name { font-weight: bold; line-height: 1.1; font-size: 10px; width: 100%; word-break: break-all; }
         
-        /* 打卡次數標籤 */
         .count-badge {
             position: absolute; bottom: 2px; right: 2px;
             background: #fff; color: #b71c1c;
@@ -82,7 +80,6 @@
         }
         .cell.active .count-badge { display: block; }
 
-        /* Debug 小點 */
         .debug-click-indicator {
             position: absolute; top: 2px; left: 2px;
             width: 4px; height: 4px; border-radius: 50%;
@@ -106,7 +103,7 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
         
-        .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; margin-right: 5px;}
+        .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; margin-right: 5px; min-width: 120px;}
 
         .btn { 
             background: linear-gradient(135deg, #d32f2f, #b71c1c); 
@@ -154,7 +151,7 @@
         資料將自動同步至雲端
     </p>
 
-    <div class="version-tag">v2026.01.23 Clean</div>
+    <div class="version-tag">v2026.01.23 Cloud Check</div>
 
     <div id="winner-overlay">
         <h2>BINGO!</h2>
@@ -239,15 +236,12 @@
                 if(clickCounts[loc.id] >= 5) {
                     dIcon.style.background = 'red';
                     
-                    // 單點移除邏輯
                     if(visitCounts[loc.id] > 0) {
                          if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除此紀錄)\n按「取消」 = 增加次數 (+1)`)) {
-                             // 歸零
                              visitCounts[loc.id] = 0;
                              savedState = savedState.filter(x => x !== loc.id);
                              saveAndReload(true); 
                          } else {
-                             // 增加
                              markVisited(loc.id, true);
                          }
                     } else {
@@ -344,6 +338,12 @@
 
     function syncToGoogleSheet() {
         if (!liff.isLoggedIn()) return;
+        
+        // 視覺回饋
+        const statusDiv = document.getElementById('status-text');
+        const originalText = statusDiv.innerHTML;
+        statusDiv.innerHTML = "☁️ 雲端資料同步中...";
+
         liff.getProfile().then(profile => {
             const payload = {
                 userId: profile.userId,
@@ -358,7 +358,15 @@
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            }).catch(console.error);
+            }).then(() => {
+                statusDiv.innerHTML = "✅ 資料已存檔！";
+                setTimeout(() => {
+                    // 如果沒有在定位中，才恢復
+                    if(!statusDiv.innerHTML.includes('經:')) statusDiv.innerHTML = "📍 GPS 待命";
+                }, 2000);
+            }).catch(err => {
+                statusDiv.innerHTML = "❌ 同步失敗 (網路錯誤)";
+            });
         });
     }
 
