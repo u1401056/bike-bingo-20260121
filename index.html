@@ -25,10 +25,10 @@
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
         
-        /* 版本號 (浮水印) */
+        /* 版本號 */
         .version-tag { 
             position: fixed; bottom: 5px; right: 5px; 
-            font-size: 9px; color: #ccc; z-index: 50; opacity: 0.5;
+            font-size: 9px; color: #ccc; z-index: 50;
         }
 
         .grid {
@@ -136,7 +136,7 @@
     
     <div class="sub-title">
         2026 賓果連線挑戰<br>
-        <span id="user-name" class="user-greeting">...</span> 
+        <span id="user-name" class="user-greeting">讀取中...</span> 
     </div>
 
     <div class="grid" id="bingo-grid"></div>
@@ -149,6 +149,11 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
+    <p style="color:#ccc; font-size:10px; margin-top:40px;">
+        Debug模式：點擊格子 5 次可增加/刪除紀錄<br>
+        資料將自動同步至雲端
+    </p>
+
     <div class="version-tag">v2026.01.23 Release</div>
 
     <div id="winner-overlay">
@@ -159,10 +164,12 @@
     </div>
 
 <script>
-    const MY_LIFF_ID = "2008939051-CMBzqbtq";
+    // ⚠️ 如果你剛才改過這裡，請確認 ID 是否正確保留
+    const MY_LIFF_ID = "2008939051-CMBzqbtq"; 
+    
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
 
-    // 25 個地點
+    // 25 個地點 (正式版)
     const locations = [
         // Row 1
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵" },
@@ -227,7 +234,6 @@
             `;
             
             cell.onclick = () => {
-                // Debug 隱藏功能：連點 5 下
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 const dIcon = document.getElementById(`debug-${loc.id}`);
                 dIcon.style.display = 'block';
@@ -236,7 +242,6 @@
                     dIcon.style.background = 'red';
                     
                     if(visitCounts[loc.id] > 0) {
-                         // 已打卡過：詢問移除
                          if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除此紀錄)\n按「取消」 = 增加次數 (+1)`)) {
                              visitCounts[loc.id] = 0;
                              savedState = savedState.filter(x => x !== loc.id);
@@ -245,7 +250,6 @@
                              markVisited(loc.id, true);
                          }
                     } else {
-                        // 未打卡：直接加分
                         markVisited(loc.id, true);
                     }
                     clickCounts[loc.id] = 0; 
@@ -341,6 +345,55 @@
         const statusDiv = document.getElementById('status-text');
         
         if (!liff.isLoggedIn()) {
-             // 未登入不顯示錯誤，保持靜默或提示登入
+             statusDiv.innerHTML = "⚠️ 未登入，無法存檔";
              return;
         }
+        
+        statusDiv.innerHTML = "☁️ 雲端同步中...";
+
+        liff.getProfile().then(profile => {
+            const payload = {
+                userId: profile.userId,
+                name: profile.displayName,
+                points: savedState.length,
+                lines: checkBingo(),
+                visitedIds: savedState,
+                visitedCounts: visitCounts
+            };
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                statusDiv.innerHTML = "✅ 資料已存檔！";
+                setTimeout(() => {
+                    if(!statusDiv.innerHTML.includes('經:')) statusDiv.innerHTML = "📍 GPS 待命";
+                }, 2000);
+            }).catch(err => {
+                statusDiv.innerHTML = "❌ 同步失敗 (網路)";
+            });
+        });
+    }
+
+    async function main() {
+        try {
+            await liff.init({ liffId: MY_LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
+                syncToGoogleSheet();
+            } else {
+                document.getElementById('user-name').innerText = " (訪客模式)";
+                liff.login();
+            }
+        } catch (err) {
+            document.getElementById('user-name').innerText = " (系統錯誤)";
+            console.error(err);
+        }
+        init();
+    }
+    main();
+</script>
+</body>
+</html>
