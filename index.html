@@ -25,7 +25,11 @@
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
         
-        .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; z-index: 50; }
+        /* 版本號 */
+        .version-tag { 
+            position: fixed; bottom: 5px; right: 5px; 
+            font-size: 9px; color: #ccc; z-index: 50;
+        }
 
         .grid {
             display: grid;
@@ -54,13 +58,20 @@
         }
         
         .cell:active { transform: scale(0.95); }
-        .cell.active { background: #b71c1c; color: white; border-color: #8e1616; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+
+        .cell.active {
+            background: #b71c1c;
+            color: white;
+            border-color: #8e1616;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
         
         .icon { font-size: 18px; margin-bottom: 2px; line-height: 1; }
         .region { font-size: 10px; color: #888; margin-bottom: 2px; transform: scale(0.9); }
         .cell.active .region { color: #ffcccc; }
         .name { font-weight: bold; line-height: 1.1; font-size: 10px; width: 100%; word-break: break-all; }
         
+        /* 打卡次數標籤 */
         .count-badge {
             position: absolute; bottom: 2px; right: 2px;
             background: #fff; color: #b71c1c;
@@ -70,7 +81,13 @@
             display: none;
         }
         .cell.active .count-badge { display: block; }
-        .debug-click-indicator { position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; border-radius: 50%; background: #ccc; display: none; }
+
+        /* Debug 小點 */
+        .debug-click-indicator {
+            position: absolute; top: 2px; left: 2px;
+            width: 4px; height: 4px; border-radius: 50%;
+            background: #ccc; display: none;
+        }
 
         @media (max-width: 360px) {
             .name { font-size: 9px; transform: scale(0.95); }
@@ -78,7 +95,6 @@
             .grid { gap: 3px; }
         }
 
-        /* 底部按鈕區 */
         .bottom-bar {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.95);
@@ -100,8 +116,8 @@
             transition: transform 0.1s;
         }
         .btn:active { transform: scale(0.95); }
-
-        /* 排行榜按鈕 (左上角) */
+        
+        /* 排行榜按鈕 */
         .rank-btn {
             position: absolute; top: 15px; right: 15px;
             background: #fbc02d; color: #333;
@@ -110,7 +126,7 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             cursor: pointer;
         }
-
+        
         /* 排行榜 Modal */
         #rank-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -130,23 +146,27 @@
         }
         .rank-item {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 5px; border-bottom: 1px solid #eee;
-            font-size: 14px;
+            padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px;
         }
         .rank-item:last-child { border-bottom: none; }
         .rank-badge {
             background: #eee; padding: 2px 6px; border-radius: 4px; 
             font-size: 10px; color: #666; margin-left: 5px;
         }
-        .rank-line-count {
-            color: #d32f2f; font-weight: bold;
-        }
+        .rank-line-count { color: #d32f2f; font-weight: bold; }
         .close-rank { cursor: pointer; font-size: 20px; }
+
+        /* 重置按鈕樣式 */
+        #reset-btn {
+            background: #666; color: white; border: none; 
+            padding: 8px 15px; border-radius: 5px; 
+            font-size: 12px; cursor: pointer; margin-top: 15px;
+        }
 
         #winner-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(183, 28, 28, 0.95); color: white; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9998;
+            align-items: center; justify-content: center; z-index: 9999;
             animation: fadeIn 0.5s;
         }
         #winner-overlay h2 { font-size: 3.5em; margin: 0; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
@@ -177,11 +197,15 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    // <p style="color:#ccc; font-size:10px; margin-top:40px;">
-    // Debug模式：點擊格子 5 次可增加/刪除紀錄<br>
-    // 資料將自動同步至雲端
-    // </p>
+    <p style="color:#ccc; font-size:10px; margin-top:40px;">
+        Debug模式：點擊格子 5 次可增加/刪除紀錄<br>
+        資料將自動同步至雲端
+    </p>
 
+    <button id="reset-btn" onclick="resetAllData()">⚠️ 重置所有紀錄</button>
+
+    <div class="version-tag">v2026.01.23 SyncFix</div>
+    
     <div id="rank-overlay">
         <div class="rank-box">
             <div class="rank-header">
@@ -194,8 +218,6 @@
         </div>
     </div>
 
-    <div class="version-tag">v2026.01.23 Leaderboard</div>
-
     <div id="winner-overlay">
         <h2>BINGO!</h2>
         <p>太強了！恭喜完成挑戰</p>
@@ -204,7 +226,7 @@
     </div>
 
 <script>
-    const MY_LIFF_ID = "2008939051-CMBzqbtq"; 
+    const MY_LIFF_ID = "2008939051-CMBzqbtq";
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
 
     // 25 個地點 (正式版)
@@ -215,24 +237,28 @@
         { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕" },
         { id: 4, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪" },
         { id: 5, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳" },
+
         // Row 2
         { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️" },
         { id: 7, region: "高雄", name: "屏山國小", lat: 22.6895, lng: 120.3092, icon: "🏫" },
         { id: 8, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼" },
         { id: 9, region: "貓空", name: "明德宮", lat: 24.9658, lng: 121.5885, icon: "⛩️" },
         { id: 10, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺" },
+
         // Row 3
         { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
         { id: 12, region: "福山", name: "馬岸餐廳", lat: 24.7746, lng: 121.5007, icon: "🥢" },
         { id: 13, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑" }, 
         { id: 14, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊" },
         { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
+
         // Row 4
         { id: 16, region: "三峽", name: "清水祖師廟", lat: 24.9338, lng: 121.3703, icon: "⛩️" },
         { id: 17, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
         { id: 18, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊" },
         { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
         { id: 20, region: "鶯歌", name: "龍窯橋", lat: 24.9537, lng: 121.3532, icon: "🐉" },
+
         // Row 5
         { id: 21, region: "萬里", name: "風櫃嘴涼亭", lat: 25.1352, lng: 121.6026, icon: "⛰️" },
         { id: 22, region: "中正", name: "華山 Allycat's", lat: 25.0441, lng: 121.5294, icon: "🍕" },
@@ -254,9 +280,11 @@
             let cell = document.createElement('div');
             const isActive = savedState.includes(loc.id);
             const count = visitCounts[loc.id] || 0;
+            
             cell.className = 'cell ' + (isActive ? 'active' : '');
             const badgeHtml = count > 0 ? `<div class="count-badge">x${count}</div>` : '';
             const debugHtml = `<div class="debug-click-indicator" id="debug-${loc.id}"></div>`;
+
             cell.innerHTML = `
                 ${debugHtml}
                 <div class="region">${loc.region}</div>
@@ -264,17 +292,20 @@
                 <div class="name">${loc.name}</div>
                 ${badgeHtml}
             `;
+            
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 const dIcon = document.getElementById(`debug-${loc.id}`);
                 dIcon.style.display = 'block';
+                
                 if(clickCounts[loc.id] >= 5) {
                     dIcon.style.background = 'red';
+                    
                     if(visitCounts[loc.id] > 0) {
                          if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除此紀錄)\n按「取消」 = 增加次數 (+1)`)) {
                              visitCounts[loc.id] = 0;
                              savedState = savedState.filter(x => x !== loc.id);
-                             saveAndReload(true); 
+                             saveAndReload(true); // 觸發同步修正
                          } else {
                              markVisited(loc.id, true);
                          }
@@ -296,16 +327,37 @@
         saveAndReload(false, isManual ? null : id);
     }
     
+    // 修正重點：現在移除時 (isRemove=true) 也會強制同步
     function saveAndReload(isRemove, alertId) {
         localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
         localStorage.setItem('bingoCounts_nccu_2026', JSON.stringify(visitCounts));
         init();
+        
         if(alertId) {
             const locName = locations.find(x=>x.id===alertId).name;
             const currentCount = visitCounts[alertId];
             alert(`🎉 打卡成功！\n${locName}\n(目前累積: ${currentCount} 次)`);
         }
-        if(!isRemove) syncToGoogleSheet();
+        
+        // 修正：無論是增加還是移除，都要同步
+        syncToGoogleSheet();
+    }
+
+    // 重置全部資料
+    function resetAllData() {
+        if(confirm("⚠️ 警告：這將會清除所有賓果連線和打卡次數，無法復原！\n\n確定要從頭開始嗎？")) {
+            // 先清空本地變數
+            savedState = [];
+            visitCounts = {};
+            localStorage.removeItem('bingoState_nccu_2026');
+            localStorage.removeItem('bingoCounts_nccu_2026');
+            
+            // 重要：發送清空指令給雲端
+            syncToGoogleSheet();
+            
+            // 延遲重整，確保資料送出
+            setTimeout(() => location.reload(), 1000);
+        }
     }
 
     function checkLocation() {
@@ -347,6 +399,7 @@
     function syncToGoogleSheet() {
         const statusDiv = document.getElementById('status-text');
         if (!liff.isLoggedIn()) { statusDiv.innerHTML = "⚠️ 未登入，無法存檔"; return; }
+        
         statusDiv.innerHTML = "☁️ 雲端同步中...";
         liff.getProfile().then(profile => {
             const payload = {
@@ -365,11 +418,73 @@
             }).then(() => {
                 statusDiv.innerHTML = "✅ 資料已存檔！";
                 setTimeout(() => { if(!statusDiv.innerHTML.includes('經:')) statusDiv.innerHTML = "📍 GPS 待命"; }, 2000);
-            }).catch(err => { statusDiv.innerHTML = "❌ 同步失敗 (網路)"; });
+            }).catch(err => { statusDiv.innerHTML = "❌ 同步失敗"; });
         });
     }
 
-    // --- 新增：讀取排行榜 ---
+    // 讀取排行榜
     function openRank() {
         document.getElementById('rank-overlay').style.display = 'flex';
-        const listDiv = document.getElementById('rank-
+        const listDiv = document.getElementById('rank-content');
+        listDiv.innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">載入中...</p>';
+        fetch(GOOGLE_SCRIPT_URL)
+        .then(response => response.json())
+        .then(data => {
+            let html = "";
+            if(data.length === 0) {
+                html = '<p style="text-align:center;margin-top:20px;">目前還沒有人打卡喔！</p>';
+            } else {
+                data.forEach((user, index) => {
+                    let visitedNames = [];
+                    if(user.visited) {
+                        const ids = user.visited.toString().split(',');
+                        visitedNames = ids.slice(0, 3).map(id => {
+                            const loc = locations.find(l => l.id == id);
+                            return loc ? loc.name : id;
+                        });
+                        if(ids.length > 3) visitedNames.push(`...等${ids.length}處`);
+                    }
+                    const visitedStr = visitedNames.length > 0 ? visitedNames.join('、') : '尚未出發';
+                    html += `
+                        <div class="rank-item">
+                            <div>
+                                <strong>${index+1}. ${user.name}</strong>
+                                <br><span style="font-size:10px; color:#888;">${visitedStr}</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="rank-line-count">${user.lines} 連線</div>
+                                <span class="rank-badge">${user.points} 格</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            listDiv.innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            listDiv.innerHTML = '<p style="text-align:center;color:red;margin-top:20px;">讀取失敗，請稍後再試</p>';
+        });
+    }
+
+    async function main() {
+        try {
+            await liff.init({ liffId: MY_LIFF_ID });
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
+                syncToGoogleSheet();
+            } else {
+                document.getElementById('user-name').innerText = " (訪客模式)";
+                liff.login();
+            }
+        } catch (err) {
+            document.getElementById('user-name').innerText = " (系統錯誤)";
+            console.error(err);
+        }
+        init();
+    }
+    main();
+</script>
+</body>
+</html>
