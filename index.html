@@ -16,7 +16,7 @@
             background: #fdf5e6; 
             text-align: center; 
             margin: 0; 
-            padding: 20px 10px 150px 10px; /* 底部留白增加給 Debug */
+            padding: 20px 10px 120px 10px; 
             -webkit-tap-highlight-color: transparent;
             min-height: 100vh;
         }
@@ -25,25 +25,10 @@
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
         
-        /* 版本號與診斷區 */
+        /* 版本號 (浮水印) */
         .version-tag { 
             position: fixed; bottom: 5px; right: 5px; 
-            font-size: 9px; color: #ccc; z-index: 50;
-        }
-        
-        /* 紅色診斷訊息盒 */
-        #debug-console {
-            width: 90%;
-            margin: 20px auto;
-            padding: 10px;
-            background: #333;
-            color: #ff5555;
-            font-size: 11px;
-            text-align: left;
-            border-radius: 8px;
-            font-family: monospace;
-            word-break: break-all;
-            display: block; /* 強制顯示 */
+            font-size: 9px; color: #ccc; z-index: 50; opacity: 0.5;
         }
 
         .grid {
@@ -86,6 +71,7 @@
         .cell.active .region { color: #ffcccc; }
         .name { font-weight: bold; line-height: 1.1; font-size: 10px; width: 100%; word-break: break-all; }
         
+        /* 打卡次數標籤 */
         .count-badge {
             position: absolute; bottom: 2px; right: 2px;
             background: #fff; color: #b71c1c;
@@ -96,6 +82,7 @@
         }
         .cell.active .count-badge { display: block; }
 
+        /* Debug 小點 */
         .debug-click-indicator {
             position: absolute; top: 2px; left: 2px;
             width: 4px; height: 4px; border-radius: 50%;
@@ -149,7 +136,7 @@
     
     <div class="sub-title">
         2026 賓果連線挑戰<br>
-        <span id="user-name" class="user-greeting">讀取中...</span> 
+        <span id="user-name" class="user-greeting">...</span> 
     </div>
 
     <div class="grid" id="bingo-grid"></div>
@@ -161,14 +148,8 @@
         </div>
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
-
-    <div id="debug-console">系統診斷中...</div>
     
-    <p style="color:#ccc; font-size:10px; margin-top:10px;">
-        Debug模式：點擊格子 5 次可增加/刪除紀錄<br>
-    </p>
-
-    <div class="version-tag">v2026.01.23 DIAGNOSTIC</div>
+    <div class="version-tag">v2026.01.23 Release</div>
 
     <div id="winner-overlay">
         <h2>BINGO!</h2>
@@ -178,10 +159,7 @@
     </div>
 
 <script>
-    // ⚠️ 請確認這裡是否為你的 LIFF ID
-    // 如果這串不是你的，請去 LINE Developers 申請並替換
-    const MY_LIFF_ID = "2008939051-CMBzqbtq"; 
-    
+    const MY_LIFF_ID = "2008939051-CMBzqbtq";
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
 
     // 25 個地點
@@ -227,13 +205,7 @@
 
     const grid = document.getElementById('bingo-grid');
     const statusText = document.getElementById('status-text');
-    const debugConsole = document.getElementById('debug-console');
     let clickCounts = {};
-
-    function logDebug(msg) {
-        console.log(msg);
-        debugConsole.innerHTML += `<div>${msg}</div>`;
-    }
 
     function init() {
         grid.innerHTML = "";
@@ -255,6 +227,7 @@
             `;
             
             cell.onclick = () => {
+                // Debug 隱藏功能：連點 5 下
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 const dIcon = document.getElementById(`debug-${loc.id}`);
                 dIcon.style.display = 'block';
@@ -263,6 +236,7 @@
                     dIcon.style.background = 'red';
                     
                     if(visitCounts[loc.id] > 0) {
+                         // 已打卡過：詢問移除
                          if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除此紀錄)\n按「取消」 = 增加次數 (+1)`)) {
                              visitCounts[loc.id] = 0;
                              savedState = savedState.filter(x => x !== loc.id);
@@ -271,6 +245,7 @@
                              markVisited(loc.id, true);
                          }
                     } else {
+                        // 未打卡：直接加分
                         markVisited(loc.id, true);
                     }
                     clickCounts[loc.id] = 0; 
@@ -366,71 +341,6 @@
         const statusDiv = document.getElementById('status-text');
         
         if (!liff.isLoggedIn()) {
-             logDebug("⚠️ 無法同步：未登入 LINE");
-             statusDiv.innerHTML = "⚠️ 未登入，無法存檔";
+             // 未登入不顯示錯誤，保持靜默或提示登入
              return;
         }
-        
-        statusDiv.innerHTML = "☁️ 雲端同步中...";
-        logDebug("📤 正在上傳資料...");
-
-        liff.getProfile().then(profile => {
-            const payload = {
-                userId: profile.userId,
-                name: profile.displayName,
-                points: savedState.length,
-                lines: checkBingo(),
-                visitedIds: savedState,
-                visitedCounts: visitCounts
-            };
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                statusDiv.innerHTML = "✅ 資料已存檔！";
-                logDebug("✅ 上傳成功!");
-                setTimeout(() => {
-                    if(!statusDiv.innerHTML.includes('經:')) statusDiv.innerHTML = "📍 GPS 待命";
-                }, 2000);
-            }).catch(err => {
-                statusDiv.innerHTML = "❌ 同步失敗";
-                logDebug("❌ 上傳失敗: " + err);
-            });
-        }).catch(err => {
-            logDebug("❌ 抓不到個資: " + err);
-        });
-    }
-
-    async function main() {
-        logDebug("系統啟動中...");
-        try {
-            // 初始化 LIFF
-            await liff.init({ liffId: MY_LIFF_ID });
-            logDebug("LIFF Init 成功");
-            
-            // 檢查登入狀態
-            if (liff.isLoggedIn()) {
-                const profile = await liff.getProfile();
-                document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
-                logDebug(`已登入: ${profile.displayName}`);
-                syncToGoogleSheet(); // 登入後先同步一次
-            } else {
-                document.getElementById('user-name').innerText = " (訪客模式)";
-                logDebug("⚠️ 未登入，嘗試自動登入...");
-                // 自動轉跳登入頁面
-                liff.login();
-            }
-        } catch (err) {
-            logDebug("❌ LIFF 錯誤: " + err.message);
-            logDebug("請檢查 LIFF ID 是否正確？");
-            document.getElementById('user-name').innerText = " (系統錯誤)";
-            document.getElementById('user-name').style.color = "red";
-        }
-        init();
-    }
-    main();
-</script>
-</body>
-</html>
