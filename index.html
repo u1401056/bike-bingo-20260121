@@ -25,7 +25,7 @@
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
         
-        .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; z-index: 50; }
+        .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; z-index: 50; opacity: 0.5; }
 
         .grid {
             display: grid;
@@ -146,15 +146,15 @@
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 版權 Footer */
+        /* 版權 Footer (極簡化處理) */
         .system-footer {
             margin-top: 40px;
             margin-bottom: 20px;
-            font-size: 10px;
-            color: #ccc;
+            font-size: 9px;
+            color: rgba(0, 0, 0, 0.2); /* 非常淡的顏色，不搶眼 */
             line-height: 1.6;
         }
-        .system-footer strong { color: #aaa; }
+        .system-footer strong { color: rgba(0, 0, 0, 0.3); }
     </style>
 </head>
 <body>
@@ -162,7 +162,7 @@
     <button class="rank-btn" onclick="openRank()">🏆 戰績榜</button>
 
     <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" width="24" style="margin-bottom:5px; opacity: 0.8;">
-    <h1 id="event-title">活動載入中...</h1>
+    <h1 id="event-title">活動標題載入中</h1>
     
     <div class="sub-title">
         <span id="event-subtitle">...</span><br>
@@ -184,7 +184,7 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v2026.01.23 CloudSync</div>
+    <div class="version-tag">v2026.01.23 Release</div>
     
     <div id="rank-overlay"><div class="rank-box"><div class="rank-header"><span>🏆 實時戰績榜</span><span class="close-rank" onclick="document.getElementById('rank-overlay').style.display='none'">✕</span></div><div class="rank-list" id="rank-content"><p style="text-align:center; color:#999; margin-top:20px;">載入中...</p></div></div></div>
     <div id="winner-overlay"><h2>BINGO!</h2><p>太強了！恭喜完成挑戰</p><br><br><button class="btn" style="background: white; color: #b71c1c;" onclick="document.getElementById('winner-overlay').style.display='none'">檢視戰績</button></div>
@@ -196,7 +196,7 @@
      * =================================================================
      */
     const SYSTEM_CONFIG = {
-        // [您的資產宣告]
+        // [資產宣告]
         authorName: "JUILING CHANG / CareLens",   
         systemName: "GoBingo Engine",    
         
@@ -205,11 +205,13 @@
         eventSubtitle: "2026 賓果連線挑戰",
 
         // [系統連線]
+        // 請確認這裡填入的是正確的 LIFF ID (From LINE Developers Console)
         liffId: "2008939051-CMBzqbtq",
+        // 請確認這裡填入的是正確的 Google Apps Script 部署網址
         googleScriptUrl: "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec"
     };
 
-    // 25 個地點 (SyncFix 原版設定)
+    // 25 個地點設定
     const locations = [
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8 },
         { id: 2, region: "深坑", name: "大茄冬樹", lat: 25.0017, lng: 121.6147, icon: "🌳" },
@@ -269,12 +271,13 @@
                 <div class="name">${loc.name}</div>${badgeHtml}
             `;
             
+            // 隱藏的 Debug 功能 (連點 5 下) - 僅保留邏輯，移除公開文字說明
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 document.getElementById(`debug-${loc.id}`).style.display = 'block';
                 if(clickCounts[loc.id] >= 5) {
                     if(visitCounts[loc.id] > 0) {
-                         if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零\n按「取消」 = 增加次數`)) {
+                         if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除資料)\n按「取消」 = 增加次數 (+1)`)) {
                              visitCounts[loc.id] = 0; savedState = savedState.filter(x => x !== loc.id); saveAndReload(true); 
                          } else { markVisited(loc.id, true); }
                     } else { markVisited(loc.id, true); }
@@ -287,8 +290,7 @@
         checkBingo();
     }
 
-    // 🔥 核心功能：雲端雙向同步 (Cloud Sync)
-    // 解決電腦/手機資料不一致的問題
+    // 核心功能：雲端雙向同步 (Cloud Sync)
     function loadUserDataFromCloud(userId) {
         const statusDiv = document.getElementById('status-text');
         statusDiv.innerHTML = "☁️ 讀取雲端紀錄...";
@@ -297,10 +299,8 @@
         .then(response => response.json())
         .then(data => {
             if (data.visitedIds) {
-                // 如果雲端有資料，將其取回並轉為陣列
                 const cloudVisited = data.visitedIds.toString().split(',').map(Number).filter(n => n > 0);
-                
-                // 簡單同步邏輯：如果雲端資料比本地多，就覆蓋本地
+                // 簡單同步邏輯：若雲端資料較多，則覆蓋本地
                 if (cloudVisited.length > savedState.length) {
                     savedState = cloudVisited;
                     cloudVisited.forEach(id => {
@@ -309,7 +309,7 @@
                     
                     localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
                     localStorage.setItem('bingoCounts_nccu_2026', JSON.stringify(visitCounts));
-                    init(); // 重新渲染畫面
+                    init(); 
                     console.log("Synced from cloud:", savedState);
                 }
             }
@@ -343,21 +343,21 @@
     function checkLocation() {
         const statusText = document.getElementById('status-text');
         statusText.innerHTML = "🛰️ 衛星定位中...";
-        if (!navigator.geolocation) { alert("錯誤：不支援 GPS"); return; }
+        if (!navigator.geolocation) { alert("錯誤：你的裝置不支援 GPS"); return; }
         navigator.geolocation.getCurrentPosition(position => {
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
             let foundCount = 0;
-            statusText.innerHTML = `📍 經:${userLng.toFixed(3)} 緯:${userLat.toFixed(3)}`;
+            statusText.innerHTML = `📍 經:${userLng.toFixed(3)} 緯:${userLat.toFixed(3)}<br><span style='font-size:9px'>誤差範圍: 依地點</span>`;
             locations.forEach(loc => {
                 const targetRadius = loc.radius || 0.5; 
                 const dist = getDistanceFromLatLonInKm(userLat, userLng, loc.lat, loc.lng);
                 if (dist < targetRadius) { markVisited(loc.id, false); foundCount++; }
             });
-            if(foundCount === 0) alert("❌ 打卡失敗\n附近沒有賓果點");
+            if(foundCount === 0) alert("❌ 打卡失敗\n附近沒有賓果點 (請確認是否在誤差範圍內)\n再靠近一點試試看！");
         }, error => {
-            statusText.innerHTML = "❌ 定位失敗";
-            alert("請允許網頁使用位置權限");
+            statusText.innerHTML = "❌ 定位失敗<br><span style='font-size:9px'>請檢查 GPS 權限</span>";
+            alert("請允許網頁使用位置權限，並確認手機 GPS 已開啟。");
         }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
     }
 
@@ -436,7 +436,7 @@
                 const profile = await liff.getProfile();
                 document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
                 
-                // 🔥 關鍵步驟：登入後立刻執行雲端同步
+                // 登入後執行同步
                 loadUserDataFromCloud(profile.userId);
                 
             } else {
