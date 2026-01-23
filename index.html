@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
     
-    <title>政大EMBA自行車社-賓果挑戰</title>
+    <title>活動載入中...</title>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
         /* 基礎設定 */
@@ -25,11 +25,7 @@
         .sub-title { color: #666; font-size: 0.95em; margin-bottom: 25px; line-height: 1.5; }
         .user-greeting { color: #b71c1c; font-weight: bold; }
         
-        /* 版本號 */
-        .version-tag { 
-            position: fixed; bottom: 5px; right: 5px; 
-            font-size: 9px; color: #ccc; z-index: 50;
-        }
+        .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; z-index: 50; }
 
         .grid {
             display: grid;
@@ -58,20 +54,13 @@
         }
         
         .cell:active { transform: scale(0.95); }
-
-        .cell.active {
-            background: #b71c1c;
-            color: white;
-            border-color: #8e1616;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-        }
+        .cell.active { background: #b71c1c; color: white; border-color: #8e1616; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
         
         .icon { font-size: 18px; margin-bottom: 2px; line-height: 1; }
         .region { font-size: 10px; color: #888; margin-bottom: 2px; transform: scale(0.9); }
         .cell.active .region { color: #ffcccc; }
         .name { font-weight: bold; line-height: 1.1; font-size: 10px; width: 100%; word-break: break-all; }
         
-        /* 打卡次數標籤 */
         .count-badge {
             position: absolute; bottom: 2px; right: 2px;
             background: #fff; color: #b71c1c;
@@ -81,13 +70,7 @@
             display: none;
         }
         .cell.active .count-badge { display: block; }
-
-        /* Debug 小點 */
-        .debug-click-indicator {
-            position: absolute; top: 2px; left: 2px;
-            width: 4px; height: 4px; border-radius: 50%;
-            background: #ccc; display: none;
-        }
+        .debug-click-indicator { position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; border-radius: 50%; background: #ccc; display: none; }
 
         @media (max-width: 360px) {
             .name { font-size: 9px; transform: scale(0.95); }
@@ -117,7 +100,6 @@
         }
         .btn:active { transform: scale(0.95); }
         
-        /* 排行榜按鈕 */
         .rank-btn {
             position: absolute; top: 15px; right: 15px;
             background: #fbc02d; color: #333;
@@ -127,7 +109,6 @@
             cursor: pointer;
         }
         
-        /* 排行榜 Modal */
         #rank-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85); z-index: 9999;
@@ -141,9 +122,7 @@
             background: #b71c1c; color: white; padding: 15px;
             font-size: 18px; font-weight: bold; display: flex; justify-content: space-between;
         }
-        .rank-list {
-            padding: 10px; overflow-y: auto; text-align: left;
-        }
+        .rank-list { padding: 10px; overflow-y: auto; text-align: left; }
         .rank-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px;
@@ -156,13 +135,6 @@
         .rank-line-count { color: #d32f2f; font-weight: bold; }
         .close-rank { cursor: pointer; font-size: 20px; }
 
-        /* 重置按鈕樣式 */
-        #reset-btn {
-            background: #666; color: white; border: none; 
-            padding: 8px 15px; border-radius: 5px; 
-            font-size: 12px; cursor: pointer; margin-top: 15px;
-        }
-
         #winner-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(183, 28, 28, 0.95); color: white; flex-direction: column;
@@ -173,6 +145,16 @@
         #winner-overlay p { font-size: 1.2em; margin-top: 10px; opacity: 0.9; }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 新增：版權 Footer 樣式 */
+        .system-footer {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-size: 10px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+        .system-footer strong { color: #aaa; }
     </style>
 </head>
 <body>
@@ -180,31 +162,33 @@
     <button class="rank-btn" onclick="openRank()">🏆 戰績榜</button>
 
     <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" width="24" style="margin-bottom:5px; opacity: 0.8;">
-    <h1>政大EMBA自行車社</h1>
+    <h1 id="event-title">活動標題載入中</h1>
     
     <div class="sub-title">
-        2026 賓果連線挑戰<br>
+        <span id="event-subtitle">...</span><br>
         <span id="user-name" class="user-greeting">讀取中...</span> 
     </div>
 
     <div class="grid" id="bingo-grid"></div>
 
+    <div class="system-footer">
+        Powered by <strong id="system-author">[您的名字]</strong><br>
+        System &copy; 2026 <span id="system-name">GoBingo Engine</span>. All Rights Reserved.
+    </div>
+
     <div class="bottom-bar">
         <div class="status-text" id="status-text">
             📍 GPS 待命<br>
-            <span style="font-size:9px; color:#999;">精準度需求: 500m</span>
+            <span style="font-size:9px; color:#999;">精準度需求: 依地點</span>
         </div>
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <p style="color:#ccc; font-size:10px; margin-top:40px;">
-        Debug模式：點擊格子 5 次可增加/刪除紀錄<br>
-        資料將自動同步至雲端
+    <p style="color:#ccc; font-size:10px; margin-top:10px;">
+        Debug模式：點擊格子 5 次可操作
     </p>
 
-    <button id="reset-btn" onclick="resetAllData()">⚠️ 重置所有紀錄</button>
-
-    <div class="version-tag">v2026.01.23 SyncFix</div>
+    <div class="version-tag">v2026.01.23 SyncFix + Copyright</div>
     
     <div id="rank-overlay">
         <div class="rank-box">
@@ -226,44 +210,54 @@
     </div>
 
 <script>
-    const MY_LIFF_ID = "2008939051-CMBzqbtq";
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec";
+    /**
+     * =================================================================
+     * 🏗️ 系統設定區 (System Config) 
+     * 修改這裡，網頁上的標題和署名會自動更新
+     * =================================================================
+     */
+    const SYSTEM_CONFIG = {
+        // 個人品牌 (資產歸屬)
+        authorName: "JUILING CHANG / CareLens",
+        systemName: "GoBingo Engine",    // 專案系統代號
+        
+        // 專案資訊
+        eventTitle: "政大EMBA單車社",
+        eventSubtitle: "2026 賓果連線挑戰",
 
-    // 25 個地點 (正式版)
+        // 連線設定
+        liffId: "2008939051-CMBzqbtq",
+        googleScriptUrl: "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec"
+    };
+
+    // --- 以下為 SyncFix 核心邏輯 ---
+
+    // 25 個地點 (設定 radius 即可自訂誤差範圍，單位: 公里)
     const locations = [
-        // Row 1
-        { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵" },
+        { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8 },
         { id: 2, region: "深坑", name: "大茄冬樹", lat: 25.0017, lng: 121.6147, icon: "🌳" },
-        { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕" },
+        { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕", radius: 0.3 },
         { id: 4, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪" },
-        { id: 5, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳" },
-
-        // Row 2
+        { id: 5, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳", radius: 1.0 },
         { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️" },
         { id: 7, region: "高雄", name: "屏山國小", lat: 22.6895, lng: 120.3092, icon: "🏫" },
-        { id: 8, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼" },
+        { id: 8, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼", radius: 1.0 },
         { id: 9, region: "貓空", name: "明德宮", lat: 24.9658, lng: 121.5885, icon: "⛩️" },
         { id: 10, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺" },
-
-        // Row 3
         { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
         { id: 12, region: "福山", name: "馬岸餐廳", lat: 24.7746, lng: 121.5007, icon: "🥢" },
         { id: 13, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑" }, 
-        { id: 14, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊" },
+        { id: 14, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊", radius: 1.0 },
         { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
-
-        // Row 4
         { id: 16, region: "三峽", name: "清水祖師廟", lat: 24.9338, lng: 121.3703, icon: "⛩️" },
         { id: 17, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
         { id: 18, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊" },
         { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
         { id: 20, region: "鶯歌", name: "龍窯橋", lat: 24.9537, lng: 121.3532, icon: "🐉" },
-
-        // Row 5
         { id: 21, region: "萬里", name: "風櫃嘴涼亭", lat: 25.1352, lng: 121.6026, icon: "⛰️" },
-        { id: 22, region: "中山", name: "銀角酒場", lat: 25.0507, lng: 121.5252, icon: "🍕" },
+        { id: 22, region: "中正", name: "華山 Allycat's", lat: 25.0441, lng: 121.5294, icon: "🍕", radius: 0.3 },
         { id: 23, region: "關渡", name: "關渡宮", lat: 25.1192, lng: 121.4673, icon: "🙏" },
-        { id: 24, region: "文山", name: "政治大學", lat: 24.9868, lng: 121.5762, icon: "🎓" },
+        { id: 24, region: "文山", name: "政治大學", lat: 24.9868, lng: 121.5762, icon: "🎓", radius: 1.0 },
         { id: 25, region: "樹林", name: "山佳火車站", lat: 24.9734, lng: 121.3978, icon: "🚂" }
     ];
 
@@ -274,7 +268,16 @@
     const statusText = document.getElementById('status-text');
     let clickCounts = {};
 
+    function applyConfig() {
+        document.title = SYSTEM_CONFIG.eventTitle;
+        document.getElementById('event-title').innerText = SYSTEM_CONFIG.eventTitle;
+        document.getElementById('event-subtitle').innerText = SYSTEM_CONFIG.eventSubtitle;
+        document.getElementById('system-author').innerText = SYSTEM_CONFIG.authorName;
+        document.getElementById('system-name').innerText = SYSTEM_CONFIG.systemName;
+    }
+
     function init() {
+        applyConfig();
         grid.innerHTML = "";
         locations.forEach(loc => {
             let cell = document.createElement('div');
@@ -305,7 +308,7 @@
                          if(confirm(`📍 ${loc.name}\n目前次數：${visitCounts[loc.id]}\n\n按「確定」 = 歸零 (移除此紀錄)\n按「取消」 = 增加次數 (+1)`)) {
                              visitCounts[loc.id] = 0;
                              savedState = savedState.filter(x => x !== loc.id);
-                             saveAndReload(true); // 觸發同步修正
+                             saveAndReload(true); 
                          } else {
                              markVisited(loc.id, true);
                          }
@@ -327,37 +330,16 @@
         saveAndReload(false, isManual ? null : id);
     }
     
-    // 修正重點：現在移除時 (isRemove=true) 也會強制同步
     function saveAndReload(isRemove, alertId) {
         localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
         localStorage.setItem('bingoCounts_nccu_2026', JSON.stringify(visitCounts));
         init();
-        
         if(alertId) {
             const locName = locations.find(x=>x.id===alertId).name;
             const currentCount = visitCounts[alertId];
             alert(`🎉 打卡成功！\n${locName}\n(目前累積: ${currentCount} 次)`);
         }
-        
-        // 修正：無論是增加還是移除，都要同步
         syncToGoogleSheet();
-    }
-
-    // 重置全部資料
-    function resetAllData() {
-        if(confirm("⚠️ 警告：這將會清除所有賓果連線和打卡次數，無法復原！\n\n確定要從頭開始嗎？")) {
-            // 先清空本地變數
-            savedState = [];
-            visitCounts = {};
-            localStorage.removeItem('bingoState_nccu_2026');
-            localStorage.removeItem('bingoCounts_nccu_2026');
-            
-            // 重要：發送清空指令給雲端
-            syncToGoogleSheet();
-            
-            // 延遲重整，確保資料送出
-            setTimeout(() => location.reload(), 1000);
-        }
     }
 
     function checkLocation() {
@@ -367,12 +349,17 @@
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
             let foundCount = 0;
-            statusText.innerHTML = `📍 經:${userLng.toFixed(3)} 緯:${userLat.toFixed(3)}<br><span style='font-size:9px'>誤差範圍: 500m</span>`;
+            statusText.innerHTML = `📍 經:${userLng.toFixed(3)} 緯:${userLat.toFixed(3)}<br><span style='font-size:9px'>誤差範圍: 依地點</span>`;
             locations.forEach(loc => {
+                const targetRadius = loc.radius || 0.5; 
                 const dist = getDistanceFromLatLonInKm(userLat, userLng, loc.lat, loc.lng);
-                if (dist < 0.5) { markVisited(loc.id, false); foundCount++; }
+                
+                if (dist < targetRadius) { 
+                    markVisited(loc.id, false); 
+                    foundCount++; 
+                }
             });
-            if(foundCount === 0) alert("❌ 打卡失敗\n附近沒有賓果點 (誤差範圍 500m)\n再靠近一點試試看！");
+            if(foundCount === 0) alert("❌ 打卡失敗\n附近沒有賓果點 (請確認是否在誤差範圍內)\n再靠近一點試試看！");
         }, error => {
             statusText.innerHTML = "❌ 定位失敗<br><span style='font-size:9px'>請檢查 GPS 權限</span>";
             alert("請允許網頁使用位置權限，並確認手機 GPS 已開啟。");
@@ -399,7 +386,6 @@
     function syncToGoogleSheet() {
         const statusDiv = document.getElementById('status-text');
         if (!liff.isLoggedIn()) { statusDiv.innerHTML = "⚠️ 未登入，無法存檔"; return; }
-        
         statusDiv.innerHTML = "☁️ 雲端同步中...";
         liff.getProfile().then(profile => {
             const payload = {
@@ -410,7 +396,7 @@
                 visitedIds: savedState,
                 visitedCounts: visitCounts
             };
-            fetch(GOOGLE_SCRIPT_URL, {
+            fetch(SYSTEM_CONFIG.googleScriptUrl, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
@@ -418,16 +404,15 @@
             }).then(() => {
                 statusDiv.innerHTML = "✅ 資料已存檔！";
                 setTimeout(() => { if(!statusDiv.innerHTML.includes('經:')) statusDiv.innerHTML = "📍 GPS 待命"; }, 2000);
-            }).catch(err => { statusDiv.innerHTML = "❌ 同步失敗"; });
+            }).catch(err => { statusDiv.innerHTML = "❌ 同步失敗 (網路)"; });
         });
     }
 
-    // 讀取排行榜
     function openRank() {
         document.getElementById('rank-overlay').style.display = 'flex';
         const listDiv = document.getElementById('rank-content');
         listDiv.innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">載入中...</p>';
-        fetch(GOOGLE_SCRIPT_URL)
+        fetch(SYSTEM_CONFIG.googleScriptUrl)
         .then(response => response.json())
         .then(data => {
             let html = "";
@@ -469,7 +454,7 @@
 
     async function main() {
         try {
-            await liff.init({ liffId: MY_LIFF_ID });
+            await liff.init({ liffId: SYSTEM_CONFIG.liffId });
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
                 document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
