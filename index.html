@@ -184,7 +184,7 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v2026.01.24 Map Update</div>
+    <div class="version-tag">v2026.01.25 Release</div>
     
     <div id="rank-overlay"><div class="rank-box"><div class="rank-header"><span>🏆 實時戰績榜</span><span class="close-rank" onclick="document.getElementById('rank-overlay').style.display='none'">✕</span></div><div class="rank-list" id="rank-content"><p style="text-align:center; color:#999; margin-top:20px;">載入中...</p></div></div></div>
     <div id="winner-overlay"><h2>BINGO!</h2><p>太強了！恭喜完成挑戰</p><br><br><button class="btn" style="background: white; color: #b71c1c;" onclick="document.getElementById('winner-overlay').style.display='none'">檢視戰績</button></div>
@@ -209,7 +209,7 @@
         googleScriptUrl: "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec"
     };
 
-    // 25 個地點 (更新版)
+    // 25 個地點 (更新東眼山)
     const locations = [
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8 },
         { id: 2, region: "大溪", name: "月眉濕地生態公園", lat: 24.8968, lng: 121.2961, icon: "🌳", radius: 0.8 },
@@ -224,9 +224,9 @@
         { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
         { id: 12, region: "烏來", name: "福山馬家堡", lat: 24.7746, lng: 121.5007, icon: "🥢", radius: 0.5 },
         { id: 13, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑" }, 
-        { id: 14, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊", radius: 1.0 },
+        { id: 14, region: "復興", name: "東眼山", lat: 24.8285, lng: 121.4192, icon: "🌲", radius: 1.0 },
         { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
-        { id: 16, region: "淡水老街", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪", radius: 0.5 },
+        { id: 16, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪", radius: 0.5 },
         { id: 17, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
         { id: 18, region: "陽明山", name: "二子坪", lat: 25.1856, lng: 121.5247, icon: "🦋", radius: 0.8 },
         { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
@@ -241,7 +241,7 @@
     let savedState = JSON.parse(localStorage.getItem('bingoState_nccu_2026')) || [];
     let visitCounts = JSON.parse(localStorage.getItem('bingoCounts_nccu_2026')) || {};
     let clickCounts = {};
-    // [安全鎖] 預設為鎖定
+    // [安全鎖]
     let isDataLoaded = false; 
 
     function applyConfig() {
@@ -271,7 +271,7 @@
                 <div class="name">${loc.name}</div>${badgeHtml}
             `;
             
-            // Debug 功能 (連點 5 下)
+            // Debug 功能
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 document.getElementById(`debug-${loc.id}`).style.display = 'block';
@@ -290,7 +290,7 @@
         checkBingo();
     }
 
-    // 核心功能：雲端雙向同步 (Cloud Sync)
+    // 雲端同步
     function loadUserDataFromCloud(userId) {
         const statusDiv = document.getElementById('status-text');
         statusDiv.innerHTML = "☁️ 讀取雲端紀錄...";
@@ -311,14 +311,13 @@
                     console.log("Synced from cloud:", savedState);
                 }
             }
-            // [解鎖] 讀取完畢，允許寫入
+            // [解鎖]
             isDataLoaded = true;
             statusDiv.innerHTML = "✅ 同步完成";
             setTimeout(() => { statusDiv.innerHTML = "📍 GPS 待命"; }, 2000);
         })
         .catch(err => {
             console.error("Cloud sync failed", err);
-            // 失敗也要解鎖，否則無法打卡
             isDataLoaded = true;
             statusDiv.innerHTML = "⚠️ 離線模式";
         });
@@ -441,10 +440,7 @@
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
                 document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
-                
-                // 登入後執行同步
                 loadUserDataFromCloud(profile.userId);
-                
             } else {
                 document.getElementById('user-name').innerText = " (訪客模式)";
                 liff.login();
