@@ -151,7 +151,7 @@
             margin-top: 40px;
             margin-bottom: 20px;
             font-size: 9px;
-            color: rgba(0, 0, 0, 0.2); /* 非常淡的顏色，不搶眼 */
+            color: rgba(0, 0, 0, 0.2);
             line-height: 1.6;
         }
         .system-footer strong { color: rgba(0, 0, 0, 0.3); }
@@ -184,7 +184,7 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v2026.01.23 Release</div>
+    <div class="version-tag">v2026.01.24 Map Update</div>
     
     <div id="rank-overlay"><div class="rank-box"><div class="rank-header"><span>🏆 實時戰績榜</span><span class="close-rank" onclick="document.getElementById('rank-overlay').style.display='none'">✕</span></div><div class="rank-list" id="rank-content"><p style="text-align:center; color:#999; margin-top:20px;">載入中...</p></div></div></div>
     <div id="winner-overlay"><h2>BINGO!</h2><p>太強了！恭喜完成挑戰</p><br><br><button class="btn" style="background: white; color: #b71c1c;" onclick="document.getElementById('winner-overlay').style.display='none'">檢視戰績</button></div>
@@ -205,44 +205,44 @@
         eventSubtitle: "2026 賓果連線挑戰",
 
         // [系統連線]
-        // 請確認這裡填入的是正確的 LIFF ID (From LINE Developers Console)
         liffId: "2008939051-CMBzqbtq",
-        // 請確認這裡填入的是正確的 Google Apps Script 部署網址
         googleScriptUrl: "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec"
     };
 
-    // 25 個地點設定
+    // 25 個地點 (更新版)
     const locations = [
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8 },
-        { id: 2, region: "深坑", name: "大茄冬樹", lat: 25.0017, lng: 121.6147, icon: "🌳" },
+        { id: 2, region: "大溪", name: "月眉濕地生態公園", lat: 24.8968, lng: 121.2961, icon: "🌳", radius: 0.8 },
         { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕", radius: 0.3 },
-        { id: 4, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪" },
+        { id: 4, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺", radius: 0.5 },
         { id: 5, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳", radius: 1.0 },
         { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️" },
         { id: 7, region: "高雄", name: "屏山國小", lat: 22.6895, lng: 120.3092, icon: "🏫" },
-        { id: 8, region: "木柵", name: "動物園", lat: 24.9986, lng: 121.5812, icon: "🐼", radius: 1.0 },
-        { id: 9, region: "貓空", name: "明德宮", lat: 24.9658, lng: 121.5885, icon: "⛩️" },
-        { id: 10, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺" },
+        { id: 8, region: "萬里", name: "風櫃嘴", lat: 25.1352, lng: 121.6026, icon: "⛰️", radius: 0.3 },
+        { id: 9, region: "平溪", name: "平溪豆花", lat: 25.0257, lng: 121.7394, icon: "🍧", radius: 0.3 },
+        { id: 10, region: "復興", name: "角板山", lat: 24.8185, lng: 121.3518, icon: "⛰️", radius: 1.0 },
         { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉" },
-        { id: 12, region: "福山", name: "馬岸餐廳", lat: 24.7746, lng: 121.5007, icon: "🥢" },
+        { id: 12, region: "烏來", name: "福山馬家堡", lat: 24.7746, lng: 121.5007, icon: "🥢", radius: 0.5 },
         { id: 13, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑" }, 
         { id: 14, region: "社子島", name: "島頭公園", lat: 25.1097, lng: 121.4638, icon: "🌊", radius: 1.0 },
         { id: 15, region: "貓空", name: "纜車終點站", lat: 24.9687, lng: 121.5886, icon: "🚡" },
-        { id: 16, region: "三峽", name: "清水祖師廟", lat: 24.9338, lng: 121.3703, icon: "⛩️" },
+        { id: 16, region: "淡水老街", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪", radius: 0.5 },
         { id: 17, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌" },
-        { id: 18, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊" },
+        { id: 18, region: "陽明山", name: "二子坪", lat: 25.1856, lng: 121.5247, icon: "🦋", radius: 0.8 },
         { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋" },
-        { id: 20, region: "鶯歌", name: "龍窯橋", lat: 24.9537, lng: 121.3532, icon: "🐉" },
-        { id: 21, region: "萬里", name: "風櫃嘴涼亭", lat: 25.1352, lng: 121.6026, icon: "⛰️" },
-        { id: 22, region: "中正", name: "華山 Allycat's", lat: 25.0441, lng: 121.5294, icon: "🍕", radius: 0.3 },
+        { id: 20, region: "五股", name: "觀音山遊客中心", lat: 25.1325, lng: 121.4243, icon: "⛰️", radius: 0.5 },
+        { id: 21, region: "坪林", name: "坪林老街", lat: 24.9357, lng: 121.7118, icon: "🍵", radius: 0.5 },
+        { id: 22, region: "三峽", name: "滿月圓", lat: 24.8346, lng: 121.4428, icon: "🌲", radius: 0.8 },
         { id: 23, region: "關渡", name: "關渡宮", lat: 25.1192, lng: 121.4673, icon: "🙏" },
-        { id: 24, region: "文山", name: "政治大學", lat: 24.9868, lng: 121.5762, icon: "🎓", radius: 1.0 },
-        { id: 25, region: "樹林", name: "山佳火車站", lat: 24.9734, lng: 121.3978, icon: "🚂" }
+        { id: 24, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊", radius: 0.5 },
+        { id: 25, region: "桃園", name: "復興空廚", lat: 25.0560, lng: 121.2480, icon: "🍞", radius: 0.5 }
     ];
 
     let savedState = JSON.parse(localStorage.getItem('bingoState_nccu_2026')) || [];
     let visitCounts = JSON.parse(localStorage.getItem('bingoCounts_nccu_2026')) || {};
     let clickCounts = {};
+    // [安全鎖] 預設為鎖定
+    let isDataLoaded = false; 
 
     function applyConfig() {
         document.title = SYSTEM_CONFIG.eventTitle;
@@ -271,7 +271,7 @@
                 <div class="name">${loc.name}</div>${badgeHtml}
             `;
             
-            // 隱藏的 Debug 功能 (連點 5 下) - 僅保留邏輯，移除公開文字說明
+            // Debug 功能 (連點 5 下)
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
                 document.getElementById(`debug-${loc.id}`).style.display = 'block';
@@ -300,24 +300,26 @@
         .then(data => {
             if (data.visitedIds) {
                 const cloudVisited = data.visitedIds.toString().split(',').map(Number).filter(n => n > 0);
-                // 簡單同步邏輯：若雲端資料較多，則覆蓋本地
                 if (cloudVisited.length > savedState.length) {
                     savedState = cloudVisited;
                     cloudVisited.forEach(id => {
                         if (!visitCounts[id]) visitCounts[id] = 1;
                     });
-                    
                     localStorage.setItem('bingoState_nccu_2026', JSON.stringify(savedState));
                     localStorage.setItem('bingoCounts_nccu_2026', JSON.stringify(visitCounts));
                     init(); 
                     console.log("Synced from cloud:", savedState);
                 }
             }
+            // [解鎖] 讀取完畢，允許寫入
+            isDataLoaded = true;
             statusDiv.innerHTML = "✅ 同步完成";
             setTimeout(() => { statusDiv.innerHTML = "📍 GPS 待命"; }, 2000);
         })
         .catch(err => {
             console.error("Cloud sync failed", err);
+            // 失敗也要解鎖，否則無法打卡
+            isDataLoaded = true;
             statusDiv.innerHTML = "⚠️ 離線模式";
         });
     }
@@ -379,6 +381,10 @@
 
     function syncToGoogleSheet() {
         const statusDiv = document.getElementById('status-text');
+        
+        // [安全鎖]
+        if (!isDataLoaded) { console.log("🔒 系統鎖定中，略過存檔"); return; }
+        
         if (!liff.isLoggedIn()) { statusDiv.innerHTML = "⚠️ 未登入"; return; }
         statusDiv.innerHTML = "☁️ 雲端同步中...";
         liff.getProfile().then(profile => {
