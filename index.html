@@ -64,4 +64,396 @@
         }
 
         /* 里程標籤 */
-        .km-tag { font-size: 7px; color:
+        .km-tag { font-size: 7px; color: #999; margin-top: 1px; transform: scale(0.95); }
+        .cell.active .km-tag { color: #ffcccc; }
+
+        /* 次數徽章 */
+        .count-badge { 
+            position: absolute; bottom: 2px; right: 2px; background: #fff; color: #b71c1c; 
+            font-size: 8px; font-weight: 800; padding: 1px 3px; border-radius: 4px; 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2); display: none; z-index: 10;
+        }
+        .cell.active .count-badge { display: block; }
+
+        /* Debug 點 */
+        .debug-dot { position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; background: #ccc; border-radius: 50%; display: none; }
+
+        /* 底部 */
+        .bottom-bar { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            background: rgba(255, 255, 255, 0.95); padding: 8px 15px; 
+            border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
+            display: flex; gap: 15px; align-items: center; z-index: 100;
+            width: 90%; max-width: 400px; justify-content: space-between;
+            backdrop-filter: blur(5px);
+        }
+        .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; }
+        .btn { background: #b71c1c; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3); }
+
+        .system-footer { margin-top: 30px; font-size: 10px; color: rgba(0, 0, 0, 0.3); line-height: 1.6; }
+        .rank-btn { position: absolute; top: 15px; right: 15px; background: #fbc02d; color: #333; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; opacity: 0.6; z-index: 50; }
+
+        /* Overlays */
+        #loading-mask { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf5e6; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top: 4px solid #b71c1c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        #rank-overlay, #winner-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9000; justify-content: center; align-items: center; }
+        .rank-box { background: white; width: 85%; max-width: 400px; max-height: 80%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .rank-header { background: #b71c1c; color: white; padding: 15px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; }
+        .rank-list { padding: 10px; overflow-y: auto; text-align: left; }
+        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .rank-badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #666; margin-left: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="loading-mask">
+        <div class="spinner"></div>
+        <div id="loading-text" style="color:#666; font-size:13px; font-weight:bold;">正在同步雲端資料...</div>
+    </div>
+
+    <button class="rank-btn" onclick="openRank()">🏆 戰績榜</button>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" width="24" style="margin-bottom:5px; opacity: 0.8;">
+    
+    <h1 id="event-title">活動載入中...</h1>
+    <div class="sub-title">
+        <span id="event-subtitle">...</span><br>
+        <span id="user-name" class="user-greeting">...</span>
+    </div>
+
+    <div class="stats-board">
+        <div class="stat-item">
+            <div class="stat-value"><span id="total-km">0</span> km</div>
+            <div class="stat-label">累積里程</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value"><span id="total-points">0</span> / 25</div>
+            <div class="stat-label">完成格數</div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="grid" id="bingo-grid"></div>
+    </div>
+
+    <div class="system-footer">
+        Powered by <strong id="system-author">...</strong><br>
+        System &copy; 2026 <span id="system-name">...</span>. All Rights Reserved.
+    </div>
+
+    <div class="bottom-bar">
+        <div class="status-text" id="status-text">
+            📍 GPS 待命<br>
+            <span style="font-size:9px; color:#999;">精準度需求: 依地點</span>
+        </div>
+        <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
+    </div>
+    
+    <div class="version-tag">v6.3 Final Release</div>
+
+    <div id="rank-overlay">
+        <div class="rank-box">
+            <div class="rank-header"><span>🏆 戰績榜</span><span style="cursor:pointer;" onclick="document.getElementById('rank-overlay').style.display='none'">✕</span></div>
+            <div class="rank-list" id="rank-content"><p style="text-align:center; color:#999; margin-top:20px;">載入中...</p></div>
+        </div>
+    </div>
+    <div id="winner-overlay">
+        <div style="text-align:center; color:white;">
+            <h2 style="font-size:3em; margin:0;">BINGO!</h2><p>恭喜完成挑戰</p>
+            <button class="btn" style="background:white; color:#b71c1c; margin-top:20px;" onclick="document.getElementById('winner-overlay').style.display='none'">檢視戰績</button>
+        </div>
+    </div>
+
+<script>
+    // ⚠️ 已自動填入您提供的 GAS 網址
+    const SYSTEM_CONFIG = {
+        authorName: "JUILING CHANG / CareLens",   
+        systemName: "GoBingo Engine",    
+        eventTitle: "政大EMBA自行車社",
+        eventSubtitle: "2026 賓果連線挑戰",
+        liffId: "2008939051-CMBzqbtq",
+        googleScriptUrl: "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec"
+    };
+
+    const locations = [
+        { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8, km: 25 },
+        { id: 2, region: "大溪", name: "月眉濕地生態公園", lat: 24.8968, lng: 121.2961, icon: "🌳", radius: 0.8, km: 60 },
+        { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕", radius: 0.3, km: 30 },
+        { id: 4, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺", radius: 0.5, km: 50 },
+        { id: 5, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳", radius: 1.0, km: 20 },
+        { id: 6, region: "八里", name: "廖添丁廟", lat: 25.1472, lng: 121.3985, icon: "⛩️", km: 55 },
+        { id: 7, region: "高雄", name: "屏山國小", lat: 22.6895, lng: 120.3092, icon: "🏫", km: 350 },
+        { id: 8, region: "萬里", name: "風櫃嘴", lat: 25.1352, lng: 121.6026, icon: "⛰️", radius: 0.3, km: 45 },
+        { id: 9, region: "平溪", name: "平溪豆花", lat: 25.0257, lng: 121.7394, icon: "🍧", radius: 0.3, km: 40 },
+        { id: 10, region: "復興", name: "角板山", lat: 24.8161, lng: 121.3513, icon: "⛰️", radius: 1.0, km: 80 },
+        { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉", km: 15 },
+        { id: 12, region: "烏來", name: "福山馬家堡", lat: 24.7746, lng: 121.5007, icon: "🥢", radius: 0.5, km: 65 },
+        { id: 13, region: "屏東", name: "壽卡鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑", km: 400 }, 
+        { id: 14, region: "復興", name: "東眼山", lat: 24.8313, lng: 121.4079, icon: "🌲", radius: 1.0, km: 90 },
+        { id: 15, region: "貓空", name: "明德宮", lat: 24.9654, lng: 121.5716, icon: "⛩️", km: 20 }, 
+        { id: 16, region: "淡水", name: "馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪", radius: 0.5, km: 60 },
+        { id: 17, region: "士林", name: "中社路頂", lat: 25.1031, lng: 121.5583, icon: "🚌", km: 35 },
+        { id: 18, region: "陽明山", name: "二子坪", lat: 25.1856, lng: 121.5247, icon: "🦋", radius: 0.8, km: 50 },
+        { id: 19, region: "內湖", name: "劍南路頂", lat: 25.0932, lng: 121.5552, icon: "🦋", km: 30 },
+        { id: 20, region: "五股", name: "觀音山遊客中心", lat: 25.1325, lng: 121.4243, icon: "⛰️", radius: 0.5, km: 45 },
+        { id: 21, region: "坪林", name: "坪林老街", lat: 24.9357, lng: 121.7118, icon: "🍵", radius: 0.5, km: 50 },
+        { id: 22, region: "三峽", name: "滿月圓", lat: 24.8346, lng: 121.4428, icon: "🌲", radius: 0.8, km: 70 },
+        { id: 23, region: "關渡", name: "關渡宮", lat: 25.1192, lng: 121.4673, icon: "🙏", km: 30 },
+        { id: 24, region: "烏來", name: "烏來瀑布", lat: 24.8490, lng: 121.5513, icon: "🌊", radius: 0.5, km: 45 },
+        { id: 25, region: "桃園", name: "復興空廚", lat: 25.0560, lng: 121.2480, icon: "🍞", radius: 0.5, km: 65 }
+    ];
+
+    let visitLogs = {};
+    let clickCounts = {};
+
+    function applyConfig() {
+        document.getElementById('event-title').innerText = SYSTEM_CONFIG.eventTitle;
+        document.getElementById('event-subtitle').innerText = SYSTEM_CONFIG.eventSubtitle;
+        document.getElementById('system-author').innerText = SYSTEM_CONFIG.authorName;
+        document.getElementById('system-name').innerText = SYSTEM_CONFIG.systemName;
+    }
+
+    // 計算里程 (含次數加成)
+    function calculateStats() {
+        let totalKm = 0;
+        let points = 0;
+        locations.forEach(loc => {
+            const logs = visitLogs[loc.id] || [];
+            if(logs.length > 0) {
+                points++; 
+                const count = logs.length;
+                if(loc.km) totalKm += (loc.km * count);
+            }
+        });
+        document.getElementById('total-km').innerText = totalKm;
+        document.getElementById('total-points').innerText = points;
+    }
+
+    async function main() {
+        applyConfig();
+        const loadingText = document.getElementById('loading-text');
+
+        try {
+            await liff.init({ liffId: SYSTEM_CONFIG.liffId });
+            
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
+                
+                loadingText.innerText = "正在連線資料庫...";
+                await fetchCloudData(profile.userId);
+            } else {
+                loadingText.innerText = "請登入 LINE...";
+                liff.login();
+            }
+        } catch (err) {
+            alert("初始化錯誤: " + err);
+            closeLoadingMask();
+        }
+    }
+
+    async function fetchCloudData(userId) {
+        const timestamp = new Date().getTime();
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 8000));
+
+        try {
+            const response = await Promise.race([
+                fetch(`${SYSTEM_CONFIG.googleScriptUrl}?userId=${userId}&t=${timestamp}`),
+                timeoutPromise
+            ]);
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            if (data.visitLogs) {
+                visitLogs = data.visitLogs;
+            }
+        } catch (e) {
+            console.error(e);
+            if (e.message !== "Timeout") {
+                alert("無法讀取雲端紀錄 (將使用離線模式)\n" + e.message);
+            }
+        } finally {
+            renderGrid();
+            closeLoadingMask();
+        }
+    }
+
+    function closeLoadingMask() {
+        const mask = document.getElementById('loading-mask');
+        mask.style.opacity = '0';
+        setTimeout(() => mask.style.display = 'none', 300);
+    }
+
+    function renderGrid() {
+        calculateStats(); 
+        checkBingo();     
+
+        const grid = document.getElementById('bingo-grid');
+        grid.innerHTML = "";
+        
+        locations.forEach(loc => {
+            let cell = document.createElement('div');
+            const logs = visitLogs[loc.id] || [];
+            const count = logs.length;
+            const isActive = count > 0;
+            
+            cell.className = `cell ${isActive ? 'active' : ''}`;
+            
+            const badgeHtml = count > 0 ? `<div class="count-badge">x${count}</div>` : '';
+            
+            // 區域 -> Icon -> 全名
+            cell.innerHTML = `
+                <div class="debug-dot" id="debug-${loc.id}"></div>
+                <div class="region">${loc.region}</div>
+                <div class="icon">${loc.icon}</div>
+                <div class="name">${loc.name}</div>
+                <div class="km-tag">${loc.km || 0}km</div>
+                ${badgeHtml}
+            `;
+
+            // Debug 點擊 (連點5下)
+            cell.onclick = () => {
+                clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
+                document.getElementById(`debug-${loc.id}`).style.display = 'block';
+                if(clickCounts[loc.id] >= 5) {
+                    if(!visitLogs[loc.id]) visitLogs[loc.id] = [];
+                    visitLogs[loc.id].push(Date.now());
+                    
+                    renderGrid();
+                    syncToCloud(true);
+                    clickCounts[loc.id] = 0;
+                }
+                setTimeout(() => document.getElementById(`debug-${loc.id}`).style.display = 'none', 800);
+            };
+
+            grid.appendChild(cell);
+        });
+    }
+
+    function checkLocation() {
+        const statusDiv = document.getElementById('status-text');
+        statusDiv.innerText = "🛰️ 定位中...";
+        
+        if (!navigator.geolocation) { alert("不支援 GPS"); return; }
+        
+        navigator.geolocation.getCurrentPosition(pos => {
+            const uLat = pos.coords.latitude;
+            const uLng = pos.coords.longitude;
+            let hit = false;
+            
+            statusDiv.innerHTML = `📍 定位成功`;
+
+            locations.forEach(loc => {
+                const radius = loc.radius || 0.5;
+                if (getDist(uLat, uLng, loc.lat, loc.lng) < radius) {
+                    
+                    if(!visitLogs[loc.id]) visitLogs[loc.id] = [];
+                    visitLogs[loc.id].push(Date.now());
+                    
+                    const count = visitLogs[loc.id].length;
+                    alert(`🎉 打卡成功：${loc.name}\n(累積次數: ${count})`);
+                    hit = true;
+                }
+            });
+
+            if (hit) {
+                renderGrid();
+                syncToCloud(); 
+            } else {
+                alert("❌ 附近沒有賓果點");
+            }
+
+        }, err => {
+            statusDiv.innerText = "❌ 定位失敗";
+            alert("請確認 GPS 已開啟");
+        }, { enableHighAccuracy: true });
+    }
+
+    function syncToCloud(silent = false) {
+        const statusDiv = document.getElementById('status-text');
+        if(!silent) statusDiv.innerText = "☁️ 存檔中...";
+        
+        liff.getProfile().then(profile => {
+            const lines = calculateLines(); 
+            fetch(SYSTEM_CONFIG.googleScriptUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: profile.userId,
+                    name: profile.displayName,
+                    visitLogs: visitLogs, 
+                    lines: lines
+                })
+            }).then(() => {
+                if(!silent) statusDiv.innerText = "✅ 已同步雲端";
+            }).catch(e => {
+                if(!silent) statusDiv.innerText = "⚠️ 存檔失敗";
+            });
+        });
+    }
+
+    function calculateLines() {
+        let activeIds = Object.keys(visitLogs).map(Number);
+        const lines = [ 
+            [1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15], [16,17,18,19,20], [21,22,23,24,25], 
+            [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], [5,10,15,20,25], 
+            [1,7,13,19,25], [5,9,13,17,21] 
+        ];
+        let winCount = 0;
+        lines.forEach(line => {
+            if (line.every(id => activeIds.includes(id))) winCount++;
+        });
+        return winCount;
+    }
+
+    function checkBingo() {
+        const winCount = calculateLines();
+        if (winCount >= 5) document.getElementById('winner-overlay').style.display = 'flex';
+    }
+
+    function openRank() {
+        document.getElementById('rank-overlay').style.display = 'flex';
+        const listDiv = document.getElementById('rank-content');
+        listDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">載入中...</p>';
+        
+        const timestamp = new Date().getTime();
+        fetch(`${SYSTEM_CONFIG.googleScriptUrl}?t=${timestamp}`)
+        .then(res => res.json())
+        .then(data => {
+            let html = "";
+            if(!Array.isArray(data) || data.length === 0) {
+                html = '<p style="text-align:center; margin-top:20px;">尚無資料</p>';
+            } else {
+                data.forEach((user, index) => {
+                    html += `
+                        <div class="rank-item">
+                            <div><strong>${index+1}. ${user.name}</strong></div>
+                            <div style="text-align:right;">
+                                <span style="color:#d32f2f; font-weight:bold;">${user.lines} 連線</span>
+                                <span class="rank-badge">${user.points} 格</span>
+                            </div>
+                        </div>`;
+                });
+            }
+            listDiv.innerHTML = html;
+        });
+    }
+
+    function getDist(lat1,lon1,lat2,lon2) {
+        var R = 6371; 
+        var dLat = (lat2-lat1) * (Math.PI/180);
+        var dLon = (lon2-lon1) * (Math.PI/180); 
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180)) * Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        return R * c;
+    }
+
+    main();
+</script>
+</body>
+</html>
