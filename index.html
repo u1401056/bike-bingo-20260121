@@ -50,7 +50,7 @@
         /* 2. 中層：Icon */
         .icon { font-size: clamp(15px, 3.5vw, 20px); margin-bottom: 1px; line-height: 1.1; }
 
-        /* 3. 下層：全名 (Full Name) - 支援強制換行 */
+        /* 3. 下層：全名 (Full Name) - 自動縮小字體以容納長名稱 */
         .name { 
             font-weight: bold; 
             font-size: clamp(8px, 2.2vw, 10px); 
@@ -58,7 +58,7 @@
             width: 100%; 
             word-break: break-all; 
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* 改為3行，確保多行文字不被切掉 */
+            -webkit-line-clamp: 3; /* 支援3行文字 */
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -91,20 +91,36 @@
         .btn { background: #b71c1c; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3); }
 
         .system-footer { margin-top: 30px; font-size: 10px; color: rgba(0, 0, 0, 0.3); line-height: 1.6; }
+        
+        /* 懸浮按鈕區 (Header Buttons) */
         .rank-btn { position: absolute; top: 15px; right: 15px; background: #fbc02d; color: #333; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .rule-btn { position: absolute; top: 15px; left: 15px; background: #90caf9; color: #0d47a1; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
         .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; opacity: 0.6; z-index: 50; }
 
-        /* Overlays */
-        #loading-mask { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf5e6; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 0.3s; }
+        /* Overlays (共用遮罩樣式) */
+        #loading-mask, #rank-overlay, #winner-overlay, #rule-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9000; display: none; justify-content: center; align-items: center; }
+        
+        /* Loading 特規 */
+        #loading-mask { background: #fdf5e6; z-index: 9999; display: flex; flex-direction: column; transition: opacity 0.3s; }
         .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top: 4px solid #b71c1c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        #rank-overlay, #winner-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9000; justify-content: center; align-items: center; }
-        .rank-box { background: white; width: 85%; max-width: 400px; max-height: 80%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-        .rank-header { background: #b71c1c; color: white; padding: 15px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; }
+        /* 彈窗盒子樣式 (Rank & Rule 共用) */
+        #rank-overlay, #winner-overlay, #rule-overlay { background: rgba(0,0,0,0.85); }
+        .rank-box, .rule-box { background: white; width: 85%; max-width: 400px; max-height: 80%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* 彈窗 Header */
+        .rank-header, .rule-header { background: #b71c1c; color: white; padding: 15px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* 彈窗 Content */
         .rank-list { padding: 10px; overflow-y: auto; text-align: left; }
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
         .rank-badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #666; margin-left: 5px; }
+        
+        /* 規則內容樣式 */
+        .rule-content { padding: 20px; overflow-y: auto; text-align: left; font-size: 14px; color: #333; line-height: 1.6; }
+        .rule-content li { margin-bottom: 12px; }
 
     </style>
 </head>
@@ -115,7 +131,9 @@
         <div id="loading-text" style="color:#666; font-size:13px; font-weight:bold;">正在同步雲端資料...</div>
     </div>
 
+    <button class="rule-btn" onclick="document.getElementById('rule-overlay').style.display='flex'">📜 規則</button>
     <button class="rank-btn" onclick="openRank()">🏆 戰績榜</button>
+
     <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" width="24" style="margin-bottom:5px; opacity: 0.8;">
     
     <h1 id="event-title">活動載入中...</h1>
@@ -152,7 +170,7 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v6.8 Text Wrap</div>
+    <div class="version-tag">v7.0 Rule Book</div>
 
     <div id="rank-overlay">
         <div class="rank-box">
@@ -160,6 +178,21 @@
             <div class="rank-list" id="rank-content"><p style="text-align:center; color:#999; margin-top:20px;">載入中...</p></div>
         </div>
     </div>
+
+    <div id="rule-overlay">
+        <div class="rule-box">
+            <div class="rule-header"><span>📜 活動規則</span><span style="cursor:pointer;" onclick="document.getElementById('rule-overlay').style.display='none'">✕</span></div>
+            <div class="rule-content">
+                <ol style="padding-left: 20px; margin: 0;">
+                    <li><strong>騎行方式：</strong>社團將不定期安排騎行活動，也歡迎大家自行完成路線騎行並打卡累積。</li>
+                    <li><strong>活動期限：</strong>結算至 <strong>2026/12/31</strong>，連線獎品將另行公告。</li>
+                    <li><strong>兌獎資格：</strong>連線獎品僅限 <strong>本年度社團會員</strong> 兌換，敬請留意。</li>
+                    <li><strong>重要提醒：</strong>請於完成各路線時於指定地點 <strong>拍照留存</strong>，未來兌獎時須提供相關佐證資料。</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
     <div id="winner-overlay">
         <div style="text-align:center; color:white;">
             <h2 style="font-size:3em; margin:0;">BINGO!</h2><p>恭喜完成挑戰</p>
@@ -178,10 +211,10 @@
         googleScriptUrl: "https://script.google.com/macros/s/AKfycbxC51dEy8oKWhWnxOYS4GN6_ZYbqXNejhnS6yg1Wva2cA8CAQSta42Vz1dcTZLN0NhCHA/exec"
     };
 
-    // ✅ 已加入 <br> 強制換行
     const locations = [
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8, km: 25 },
-        { id: 2, region: "大溪", name: "月眉濕地<br>生態公園", lat: 24.8968, lng: 121.2961, icon: "🌳", radius: 0.8, km: 60 },
+        // ✅ ID 2: 石門水庫入口 (坪林管制站座標)
+        { id: 2, region: "大溪", name: "石門水庫<br>入口", lat: 24.8115, lng: 121.2476, icon: "💧", radius: 0.8, km: 60 },
         { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕", radius: 0.3, km: 30 },
         { id: 4, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺", radius: 0.5, km: 50 },
         { id: 5, region: "萬華", name: "馬場町公園", lat: 25.0207, lng: 121.5032, icon: "🌳", radius: 1.0, km: 20 },
@@ -192,7 +225,8 @@
         { id: 10, region: "復興", name: "角板山", lat: 24.8161, lng: 121.3513, icon: "⛰️", radius: 1.0, km: 80 },
         { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉", km: 15 },
         { id: 12, region: "烏來", name: "福山<br>馬家堡", lat: 24.7746, lng: 121.5007, icon: "🥢", radius: 0.5, km: 65 },
-        { id: 13, region: "屏東", name: "壽卡<br>鐵馬驛站", lat: 22.2427, lng: 120.8561, icon: "👑", km: 400 }, 
+        // ✅ ID 13: 合歡山武嶺 (武嶺亭座標)
+        { id: 13, region: "南投", name: "合歡山<br>武嶺牌樓", lat: 24.1369, lng: 121.2771, icon: "⛰️", km: 400 }, 
         { id: 14, region: "復興", name: "東眼山", lat: 24.8313, lng: 121.4079, icon: "🌲", radius: 1.0, km: 90 },
         { id: 15, region: "貓空", name: "明德宮", lat: 24.9654, lng: 121.5716, icon: "⛩️", km: 20 }, 
         { id: 16, region: "淡水", name: "淡水老街<br>馬偕上岸處", lat: 25.1717, lng: 121.4404, icon: "⛪", radius: 0.5, km: 60 },
@@ -232,7 +266,6 @@
         document.getElementById('total-points').innerText = points;
     }
 
-    // 正式版 (靜默載入)
     async function main() {
         applyConfig();
         const loadingText = document.getElementById('loading-text');
@@ -353,7 +386,6 @@
                     visitLogs[loc.id].push(Date.now());
                     
                     const count = visitLogs[loc.id].length;
-                    // 將 <br> 換成空格顯示在 alert 中，比較美觀
                     const cleanName = loc.name.replace("<br>", " ");
                     alert(`🎉 打卡成功：${cleanName}\n(累積次數: ${count})`);
                     hit = true;
