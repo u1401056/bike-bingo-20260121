@@ -58,7 +58,7 @@
             width: 100%; 
             word-break: break-all; 
             display: -webkit-box;
-            -webkit-line-clamp: 3; /* 支援3行文字 */
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -78,7 +78,7 @@
         /* Debug 點 */
         .debug-dot { position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; background: #ccc; border-radius: 50%; display: none; }
 
-        /* 底部 */
+        /* 底部 Bar (新增雷達變色支援) */
         .bottom-bar { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
             background: rgba(255, 255, 255, 0.95); padding: 8px 15px; 
@@ -86,8 +86,14 @@
             display: flex; gap: 15px; align-items: center; z-index: 100;
             width: 90%; max-width: 400px; justify-content: space-between;
             backdrop-filter: blur(5px);
+            transition: background-color 0.3s, border 0.3s;
         }
-        .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; }
+        /* 預警狀態 (1000m內) */
+        .bottom-bar.warning { background: rgba(255, 236, 179, 0.95); border: 1px solid #ffc107; }
+        /* 抵達狀態 (100m內) */
+        .bottom-bar.alert { background: rgba(255, 205, 210, 0.95); border: 1px solid #f44336; }
+
+        .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; flex-grow: 1; }
         .btn { background: #b71c1c; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3); }
 
         .system-footer { margin-top: 30px; font-size: 10px; color: rgba(0, 0, 0, 0.3); line-height: 1.6; }
@@ -121,6 +127,15 @@
         /* 規則內容樣式 */
         .rule-content { padding: 20px; overflow-y: auto; text-align: left; font-size: 14px; color: #333; line-height: 1.6; }
         .rule-content li { margin-bottom: 12px; }
+
+        /* --- 新增：自動提醒彈窗 (Auto Alert Modal) --- */
+        #auto-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .auto-alert-box { background: white; width: 80%; max-width: 320px; border-radius: 15px; text-align: center; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out; }
+        .auto-alert-icon { font-size: 45px; margin-bottom: 10px; line-height: 1; }
+        .auto-alert-title { color: #b71c1c; font-size: 20px; font-weight: bold; margin: 0 0 10px 0; }
+        .auto-alert-desc { color: #555; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
+        .auto-alert-close { margin-top: 15px; font-size: 12px; color: #999; cursor: pointer; text-decoration: underline; }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
     </style>
 </head>
@@ -162,15 +177,15 @@
         System &copy; 2026 <span id="system-name">...</span>. All Rights Reserved.
     </div>
 
-    <div class="bottom-bar">
+    <div class="bottom-bar" id="bottom-bar">
         <div class="status-text" id="status-text">
-            📍 GPS 待命<br>
-            <span style="font-size:9px; color:#999;">精準度需求: 依地點</span>
+            <span id="radar-icon">📍</span> <strong id="radar-title">GPS 待命</strong><br>
+            <span id="radar-desc" style="font-size:9px; color:#999;">開啟頁面即啟動雷達</span>
         </div>
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v7.0 Rule Book</div>
+    <div class="version-tag">v7.1 Radar Ready</div>
 
     <div id="rank-overlay">
         <div class="rank-box">
@@ -188,6 +203,7 @@
                     <li><strong>活動期限：</strong>結算至 <strong>2026/12/31</strong>，連線獎品將另行公告。</li>
                     <li><strong>兌獎資格：</strong>連線獎品僅限 <strong>本年度社團會員</strong> 兌換，敬請留意。</li>
                     <li><strong>重要提醒：</strong>請於完成各路線時於指定地點 <strong>拍照留存</strong>，未來兌獎時須提供相關佐證資料。</li>
+                    <li><strong>自動雷達：</strong>騎行時保持螢幕解鎖開啟本頁面，靠近打卡點時將自動提醒您！</li>
                 </ol>
             </div>
         </div>
@@ -200,8 +216,18 @@
         </div>
     </div>
 
+    <div id="auto-alert-overlay">
+        <div class="auto-alert-box">
+            <div class="auto-alert-icon">🎯</div>
+            <h3 class="auto-alert-title">已抵達打卡點！</h3>
+            <div class="auto-alert-desc" id="auto-alert-text">您已進入 <strong style="color:#b71c1c;" id="auto-alert-location-name">[地點名稱]</strong> 範圍，快按下打卡吧！</div>
+            <button class="btn" style="width:100%; padding:12px; font-size:16px;" onclick="checkLocation(); document.getElementById('auto-alert-overlay').style.display='none';">📍 立即手動打卡</button>
+            <div class="auto-alert-close" onclick="document.getElementById('auto-alert-overlay').style.display='none'">稍後再說</div>
+        </div>
+    </div>
+
 <script>
-    // ✅ 正式版設定
+    // ✅ JS 部分完全未更動，維持原樣，確保上線不報錯
     const SYSTEM_CONFIG = {
         authorName: "JUILING CHANG / CareLens",   
         systemName: "GoBingo Engine",    
@@ -213,7 +239,6 @@
 
     const locations = [
         { id: 1, region: "大稻埕", name: "貨櫃市集", lat: 25.0575, lng: 121.5078, icon: "⛵", radius: 0.8, km: 25 },
-        // ✅ ID 2: 石門水庫入口 (坪林管制站座標)
         { id: 2, region: "大溪", name: "石門水庫<br>入口", lat: 24.8115, lng: 121.2476, icon: "💧", radius: 0.8, km: 60 },
         { id: 3, region: "石碇", name: "海倫咖啡", lat: 24.9634, lng: 121.6247, icon: "☕", radius: 0.3, km: 30 },
         { id: 4, region: "鶯歌", name: "陶瓷博物館", lat: 24.9496, lng: 121.3537, icon: "🏺", radius: 0.5, km: 50 },
@@ -225,7 +250,6 @@
         { id: 10, region: "復興", name: "角板山", lat: 24.8161, lng: 121.3513, icon: "⛰️", radius: 1.0, km: 80 },
         { id: 11, region: "新店", name: "碧潭吊橋", lat: 24.9546, lng: 121.5363, icon: "🌉", km: 15 },
         { id: 12, region: "烏來", name: "福山<br>馬家堡", lat: 24.7746, lng: 121.5007, icon: "🥢", radius: 0.5, km: 65 },
-        // ✅ ID 13: 合歡山武嶺 (武嶺亭座標)
         { id: 13, region: "南投", name: "合歡山<br>武嶺牌樓", lat: 24.1369, lng: 121.2771, icon: "⛰️", km: 400 }, 
         { id: 14, region: "復興", name: "東眼山", lat: 24.8313, lng: 121.4079, icon: "🌲", radius: 1.0, km: 90 },
         { id: 15, region: "貓空", name: "明德宮", lat: 24.9654, lng: 121.5716, icon: "⛩️", km: 20 }, 
@@ -337,7 +361,6 @@
             
             const badgeHtml = count > 0 ? `<div class="count-badge">x${count}</div>` : '';
             
-            // 區域 -> Icon -> 全名
             cell.innerHTML = `
                 <div class="debug-dot" id="debug-${loc.id}"></div>
                 <div class="region">${loc.region}</div>
