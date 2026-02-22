@@ -78,7 +78,7 @@
         /* Debug 點 */
         .debug-dot { position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; background: #ccc; border-radius: 50%; display: none; }
 
-        /* 底部 Bar (新增雷達變色支援) */
+        /* 底部 Bar (新增綠色完成狀態) */
         .bottom-bar { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
             background: rgba(255, 255, 255, 0.95); padding: 8px 15px; 
@@ -92,13 +92,15 @@
         .bottom-bar.warning { background: rgba(255, 236, 179, 0.95); border: 1px solid #ffc107; }
         /* 抵達狀態 (100m內) */
         .bottom-bar.alert { background: rgba(255, 205, 210, 0.95); border: 1px solid #f44336; }
+        /* 今日已打卡狀態 */
+        .bottom-bar.success { background: rgba(232, 245, 233, 0.95); border: 1px solid #4caf50; }
 
         .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; flex-grow: 1; }
         .btn { background: #b71c1c; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3); }
 
         .system-footer { margin-top: 30px; font-size: 10px; color: rgba(0, 0, 0, 0.3); line-height: 1.6; }
         
-        /* 懸浮按鈕區 (Header Buttons) */
+        /* 懸浮按鈕區 */
         .rank-btn { position: absolute; top: 15px; right: 15px; background: #fbc02d; color: #333; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .rule-btn { position: absolute; top: 15px; left: 15px; background: #90caf9; color: #0d47a1; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
@@ -112,23 +114,17 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top: 4px solid #b71c1c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* 彈窗盒子樣式 (Rank & Rule 共用) */
+        /* 彈窗盒子樣式 */
         #rank-overlay, #winner-overlay, #rule-overlay { background: rgba(0,0,0,0.85); }
         .rank-box, .rule-box { background: white; width: 85%; max-width: 400px; max-height: 80%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-        
-        /* 彈窗 Header */
         .rank-header, .rule-header { background: #b71c1c; color: white; padding: 15px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* 彈窗 Content */
         .rank-list { padding: 10px; overflow-y: auto; text-align: left; }
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
         .rank-badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #666; margin-left: 5px; }
-        
-        /* 規則內容樣式 */
         .rule-content { padding: 20px; overflow-y: auto; text-align: left; font-size: 14px; color: #333; line-height: 1.6; }
         .rule-content li { margin-bottom: 12px; }
 
-        /* --- 新增：自動提醒彈窗 (Auto Alert Modal) --- */
+        /* 自動提醒彈窗 */
         #auto-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; }
         .auto-alert-box { background: white; width: 80%; max-width: 320px; border-radius: 15px; text-align: center; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out; }
         .auto-alert-icon { font-size: 45px; margin-bottom: 10px; line-height: 1; }
@@ -179,13 +175,13 @@
 
     <div class="bottom-bar" id="bottom-bar">
         <div class="status-text" id="status-text">
-            <span id="radar-icon">📍</span> <strong id="radar-title">GPS 待命</strong><br>
-            <span id="radar-desc" style="font-size:9px; color:#999;">開啟頁面即啟動雷達</span>
+            <span id="radar-icon">📍</span> <strong id="radar-title">GPS 雷達啟動中...</strong><br>
+            <span id="radar-desc" style="font-size:9px; color:#999;">正在獲取定位</span>
         </div>
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v7.1 Radar Ready</div>
+    <div class="version-tag">v7.3 Smart Radar</div>
 
     <div id="rank-overlay">
         <div class="rank-box">
@@ -203,7 +199,7 @@
                     <li><strong>活動期限：</strong>結算至 <strong>2026/12/31</strong>，連線獎品將另行公告。</li>
                     <li><strong>兌獎資格：</strong>連線獎品僅限 <strong>本年度社團會員</strong> 兌換，敬請留意。</li>
                     <li><strong>重要提醒：</strong>請於完成各路線時於指定地點 <strong>拍照留存</strong>，未來兌獎時須提供相關佐證資料。</li>
-                    <li><strong>自動雷達：</strong>騎行時保持螢幕解鎖開啟本頁面，靠近打卡點時將自動提醒您！</li>
+                    <li><strong>自動雷達：</strong>騎行時保持本頁面開啟，或於抵達休息點時解鎖喚醒本頁面，系統將自動偵測並提醒您打卡！</li>
                 </ol>
             </div>
         </div>
@@ -227,7 +223,6 @@
     </div>
 
 <script>
-    // ✅ JS 部分完全未更動，維持原樣，確保上線不報錯
     const SYSTEM_CONFIG = {
         authorName: "JUILING CHANG / CareLens",   
         systemName: "GoBingo Engine",    
@@ -267,6 +262,10 @@
 
     let visitLogs = {};
     let clickCounts = {};
+    
+    // 雷達系統變數
+    let radarWatchId = null;
+    let alertCooldown = {};
 
     function applyConfig() {
         document.getElementById('event-title').innerText = SYSTEM_CONFIG.eventTitle;
@@ -303,6 +302,9 @@
                 
                 loadingText.innerText = "正在同步雲端資料...";
                 await fetchCloudData(profile.userId);
+                
+                // 啟動自動雷達
+                startRadar();
             } else {
                 loadingText.innerText = "請登入 LINE...";
                 liff.login();
@@ -311,6 +313,122 @@
             console.error(err);
             loadingText.innerText = "連線異常，將使用離線模式";
             setTimeout(closeLoadingMask, 1500); 
+        }
+    }
+
+    // 喚醒偵測 (Visibility Change)
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === 'visible') {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(processPosition, (err) => {
+                    console.log("喚醒定位失敗", err);
+                }, { enableHighAccuracy: true, timeout: 5000 });
+            }
+        }
+    });
+
+    // 啟動雷達引擎
+    function startRadar() {
+        if (!navigator.geolocation) { 
+            document.getElementById('radar-title').innerText = "雷達不支援";
+            return; 
+        }
+        
+        radarWatchId = navigator.geolocation.watchPosition(
+            processPosition, 
+            (err) => {
+                document.getElementById('radar-title').innerText = "雷達收訊不佳";
+                document.getElementById('radar-desc').innerText = "請確認定位服務已開啟";
+            }, 
+            { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
+        );
+    }
+
+    // --- 新增：檢查今日是否已打卡 ---
+    function hasCheckedInToday(locId) {
+        const logs = visitLogs[locId];
+        if (!logs || logs.length === 0) return false;
+        
+        // 取得最後一次打卡的時間戳記
+        const lastTimestamp = logs[logs.length - 1];
+        const lastDate = new Date(lastTimestamp).toDateString();
+        const todayDate = new Date().toDateString();
+        
+        return lastDate === todayDate;
+    }
+
+    // 核心定位與距離判定邏輯
+    function processPosition(pos) {
+        const uLat = pos.coords.latitude;
+        const uLng = pos.coords.longitude;
+        
+        let nearestLoc = null;
+        let minDist = Infinity;
+
+        locations.forEach(loc => {
+            const dist = getDist(uLat, uLng, loc.lat, loc.lng);
+            if (dist < minDist) {
+                minDist = dist;
+                nearestLoc = loc;
+            }
+        });
+
+        if (!nearestLoc) return;
+
+        const bar = document.getElementById('bottom-bar');
+        const rTitle = document.getElementById('radar-title');
+        const rDesc = document.getElementById('radar-desc');
+        const cleanName = nearestLoc.name.replace("<br>", " ");
+        
+        // 檢查是否為「今日已打卡」
+        const isCheckedToday = hasCheckedInToday(nearestLoc.id);
+
+        if (minDist <= 0.1) {
+            // 抵達區 (< 100m)
+            if (isCheckedToday) {
+                bar.className = "bottom-bar success";
+                rTitle.innerText = `今日已完成: ${cleanName}`;
+                rDesc.innerText = `好好休息，準備下一站！`;
+            } else {
+                bar.className = "bottom-bar alert";
+                rTitle.innerText = `已抵達: ${cleanName}`;
+                rDesc.innerText = `距離: 進入範圍`;
+                triggerAutoAlert(nearestLoc);
+            }
+        } else if (minDist <= 1.0) {
+            // 預警區 (< 1000m)
+            if (isCheckedToday) {
+                bar.className = "bottom-bar success";
+                rTitle.innerText = `重返: ${cleanName}`;
+                rDesc.innerText = `今日已在此完成打卡`;
+            } else {
+                bar.className = "bottom-bar warning";
+                rTitle.innerText = `接近中: ${cleanName}`;
+                rDesc.innerText = `直線距離: ${(minDist * 1000).toFixed(0)}m`;
+            }
+        } else {
+            // 安全區 (> 1000m)
+            bar.className = "bottom-bar";
+            rTitle.innerText = `雷達掃描中...`;
+            rDesc.innerText = `最近點: ${cleanName} (${minDist.toFixed(1)}km)`;
+        }
+    }
+
+    // 觸發彈窗與震動 (含 15 分鐘防擾)
+    function triggerAutoAlert(loc) {
+        const now = Date.now();
+        const lastAlert = alertCooldown[loc.id] || 0;
+        
+        if (now - lastAlert > 900000) {
+            const cleanName = loc.name.replace("<br>", " ");
+            document.getElementById('auto-alert-location-name').innerText = cleanName;
+            document.getElementById('auto-alert-overlay').style.display = 'flex';
+            
+            if (navigator.vibrate) {
+                navigator.vibrate([200, 100, 200]);
+            }
+            
+            alertCooldown[loc.id] = now; 
         }
     }
 
@@ -389,8 +507,9 @@
     }
 
     function checkLocation() {
-        const statusDiv = document.getElementById('status-text');
-        statusDiv.innerText = "🛰️ 定位中...";
+        const rTitle = document.getElementById('radar-title');
+        const originalTitle = rTitle.innerText;
+        rTitle.innerText = "定位確認中...";
         
         if (!navigator.geolocation) { alert("不支援 GPS"); return; }
         
@@ -399,8 +518,6 @@
             const uLng = pos.coords.longitude;
             let hit = false;
             
-            statusDiv.innerHTML = `📍 定位成功`;
-
             locations.forEach(loc => {
                 const radius = loc.radius || 0.5;
                 if (getDist(uLat, uLng, loc.lat, loc.lng) < radius) {
@@ -412,25 +529,30 @@
                     const cleanName = loc.name.replace("<br>", " ");
                     alert(`🎉 打卡成功：${cleanName}\n(累積次數: ${count})`);
                     hit = true;
+                    
+                    // 打卡成功後立即更新畫面與儀表板狀態
+                    alertCooldown[loc.id] = Date.now(); 
                 }
             });
 
             if (hit) {
                 renderGrid();
                 syncToCloud(); 
+                // 強制觸發一次位置更新，讓底部儀表板馬上轉成綠色
+                processPosition(pos);
             } else {
                 alert("❌ 附近沒有賓果點");
+                rTitle.innerText = originalTitle;
             }
 
         }, err => {
-            statusDiv.innerText = "❌ 定位失敗";
+            rTitle.innerText = "❌ 定位失敗";
             alert("請確認 GPS 已開啟");
         }, { enableHighAccuracy: true });
     }
 
     function syncToCloud(silent = false) {
-        const statusDiv = document.getElementById('status-text');
-        if(!silent) statusDiv.innerText = "☁️ 存檔中...";
+        if(!silent) document.getElementById('radar-title').innerText = "☁️ 存檔中...";
         
         liff.getProfile().then(profile => {
             const lines = calculateLines(); 
@@ -445,9 +567,9 @@
                     lines: lines
                 })
             }).then(() => {
-                if(!silent) statusDiv.innerText = "✅ 已同步雲端";
+                if(!silent) document.getElementById('radar-title').innerText = "✅ 已同步雲端";
             }).catch(e => {
-                if(!silent) statusDiv.innerText = "⚠️ 存檔失敗";
+                if(!silent) document.getElementById('radar-title').innerText = "⚠️ 存檔失敗";
             });
         });
     }
