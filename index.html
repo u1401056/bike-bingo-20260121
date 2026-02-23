@@ -88,11 +88,8 @@
             backdrop-filter: blur(5px);
             transition: background-color 0.3s, border 0.3s;
         }
-        /* 預警狀態 (1000m內) */
         .bottom-bar.warning { background: rgba(255, 236, 179, 0.95); border: 1px solid #ffc107; }
-        /* 抵達狀態 (100m內) */
         .bottom-bar.alert { background: rgba(255, 205, 210, 0.95); border: 1px solid #f44336; }
-        /* 今日已打卡狀態 */
         .bottom-bar.success { background: rgba(232, 245, 233, 0.95); border: 1px solid #4caf50; }
 
         .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; flex-grow: 1; }
@@ -175,13 +172,13 @@
 
     <div class="bottom-bar" id="bottom-bar">
         <div class="status-text" id="status-text">
-            <span id="radar-icon">📍</span> <strong id="radar-title">GPS 雷達啟動中...</strong><br>
-            <span id="radar-desc" style="font-size:9px; color:#999;">正在獲取定位</span>
+            <span id="radar-icon">📍</span> <strong id="radar-title">GPS 雷達準備中...</strong><br>
+            <span id="radar-desc" style="font-size:9px; color:#999;">等待資料同步完成</span>
         </div>
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v7.3 Smart Radar</div>
+    <div class="version-tag">v7.3.1 Sync Fix</div>
 
     <div id="rank-overlay">
         <div class="rank-box">
@@ -263,9 +260,10 @@
     let visitLogs = {};
     let clickCounts = {};
     
-    // 雷達系統變數
+    // 雷達系統與狀態變數
     let radarWatchId = null;
     let alertCooldown = {};
+    let isSystemReady = false; // ✅ 新增：系統準備狀態鎖，防止權限視窗干擾同步
 
     function applyConfig() {
         document.getElementById('event-title').innerText = SYSTEM_CONFIG.eventTitle;
@@ -303,7 +301,8 @@
                 loadingText.innerText = "正在同步雲端資料...";
                 await fetchCloudData(profile.userId);
                 
-                // 啟動自動雷達
+                // ✅ 確保雲端資料同步且畫面渲染完畢後，才解鎖雷達權限
+                isSystemReady = true; 
                 startRadar();
             } else {
                 loadingText.innerText = "請登入 LINE...";
@@ -312,12 +311,19 @@
         } catch (err) {
             console.error(err);
             loadingText.innerText = "連線異常，將使用離線模式";
-            setTimeout(closeLoadingMask, 1500); 
+            setTimeout(closeLoadingMask, 1500);
+            
+            // 離線模式也解鎖，允許本地雷達運作
+            isSystemReady = true; 
+            startRadar();
         }
     }
 
     // 喚醒偵測 (Visibility Change)
     document.addEventListener("visibilitychange", () => {
+        // ✅ 安全閥：如果系統還沒準備好（還在同步中），阻斷背景強制更新
+        if (!isSystemReady) return; 
+        
         if (document.visibilityState === 'visible') {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(processPosition, (err) => {
@@ -334,6 +340,9 @@
             return; 
         }
         
+        document.getElementById('radar-title').innerText = "GPS 雷達啟動中...";
+        document.getElementById('radar-desc').innerText = "正在獲取定位";
+
         radarWatchId = navigator.geolocation.watchPosition(
             processPosition, 
             (err) => {
@@ -344,12 +353,11 @@
         );
     }
 
-    // --- 新增：檢查今日是否已打卡 ---
+    // 檢查今日是否已打卡
     function hasCheckedInToday(locId) {
         const logs = visitLogs[locId];
         if (!logs || logs.length === 0) return false;
         
-        // 取得最後一次打卡的時間戳記
         const lastTimestamp = logs[logs.length - 1];
         const lastDate = new Date(lastTimestamp).toDateString();
         const todayDate = new Date().toDateString();
@@ -380,7 +388,6 @@
         const rDesc = document.getElementById('radar-desc');
         const cleanName = nearestLoc.name.replace("<br>", " ");
         
-        // 檢查是否為「今日已打卡」
         const isCheckedToday = hasCheckedInToday(nearestLoc.id);
 
         if (minDist <= 0.1) {
@@ -414,7 +421,7 @@
         }
     }
 
-    // 觸發彈窗與震動 (含 15 分鐘防擾)
+    // 觸發彈窗與震動
     function triggerAutoAlert(loc) {
         const now = Date.now();
         const lastAlert = alertCooldown[loc.id] || 0;
@@ -449,7 +456,7 @@
                 visitLogs = data.visitLogs;
             }
         } catch (e) {
-            console.error(e);
+            console.error("同步失敗或遭攔截：", e);
         } finally {
             renderGrid();
             closeLoadingMask();
@@ -530,7 +537,6 @@
                     alert(`🎉 打卡成功：${cleanName}\n(累積次數: ${count})`);
                     hit = true;
                     
-                    // 打卡成功後立即更新畫面與儀表板狀態
                     alertCooldown[loc.id] = Date.now(); 
                 }
             });
@@ -538,7 +544,6 @@
             if (hit) {
                 renderGrid();
                 syncToCloud(); 
-                // 強制觸發一次位置更新，讓底部儀表板馬上轉成綠色
                 processPosition(pos);
             } else {
                 alert("❌ 附近沒有賓果點");
