@@ -33,7 +33,7 @@
         .grid-container { width: 100%; display: flex; justify-content: center; padding: 0 10px; }
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%; max-width: 500px; aspect-ratio: 1/1; }
         
-        /* 格子樣式 (三層排版) */
+        /* 格子樣式 */
         .cell { 
             background: white; border: 1.5px solid #b71c1c; border-radius: 8px; 
             display: flex; flex-direction: column; 
@@ -42,43 +42,16 @@
             padding: 2px; 
         }
         .cell.active { background: #b71c1c; color: white; }
-        
-        /* 1. 上層：區域 (Region) */
         .region { font-size: 9px; color: #888; margin-bottom: 1px; line-height: 1; }
         .cell.active .region { color: #ffcccc; }
-
-        /* 2. 中層：Icon */
         .icon { font-size: clamp(15px, 3.5vw, 20px); margin-bottom: 1px; line-height: 1.1; }
-
-        /* 3. 下層：全名 (Full Name) - 自動縮小字體以容納長名稱 */
-        .name { 
-            font-weight: bold; 
-            font-size: clamp(8px, 2.2vw, 10px); 
-            line-height: 1.1; 
-            width: 100%; 
-            word-break: break-all; 
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* 里程標籤 */
+        .name { font-weight: bold; font-size: clamp(8px, 2.2vw, 10px); line-height: 1.1; width: 100%; word-break: break-all; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .km-tag { font-size: 7px; color: #999; margin-top: 1px; transform: scale(0.95); }
         .cell.active .km-tag { color: #ffcccc; }
-
-        /* 次數徽章 */
-        .count-badge { 
-            position: absolute; bottom: 2px; right: 2px; background: #fff; color: #b71c1c; 
-            font-size: 8px; font-weight: 800; padding: 1px 3px; border-radius: 4px; 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.2); display: none; z-index: 10;
-        }
+        .count-badge { position: absolute; bottom: 2px; right: 2px; background: #fff; color: #b71c1c; font-size: 8px; font-weight: 800; padding: 1px 3px; border-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.2); display: none; z-index: 10; }
         .cell.active .count-badge { display: block; }
 
-        /* Debug 點 */
-        .debug-dot { position: absolute; top: 2px; left: 2px; width: 4px; height: 4px; background: #ccc; border-radius: 50%; display: none; }
-
-        /* 底部 Bar (新增綠色完成狀態) */
+        /* 底部 Bar */
         .bottom-bar { 
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
             background: rgba(255, 255, 255, 0.95); padding: 8px 15px; 
@@ -91,43 +64,35 @@
         .bottom-bar.warning { background: rgba(255, 236, 179, 0.95); border: 1px solid #ffc107; }
         .bottom-bar.alert { background: rgba(255, 205, 210, 0.95); border: 1px solid #f44336; }
         .bottom-bar.success { background: rgba(232, 245, 233, 0.95); border: 1px solid #4caf50; }
-
         .status-text { font-size: 11px; color: #555; text-align: left; line-height: 1.2; flex-grow: 1; }
         .btn { background: #b71c1c; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 14px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(183, 28, 28, 0.3); }
 
-        .system-footer { margin-top: 30px; font-size: 10px; color: rgba(0, 0, 0, 0.3); line-height: 1.6; }
+        /* Footer 版權資訊 */
+        .system-footer { margin-top: 30px; font-size: 10px; color: rgba(0, 0, 0, 0.4); line-height: 1.6; padding: 0 20px; }
+        .system-footer strong { color: rgba(183, 28, 28, 0.6); }
         
-        /* 懸浮按鈕區 */
+        /* 懸浮按鈕 */
         .rank-btn { position: absolute; top: 15px; right: 15px; background: #fbc02d; color: #333; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .rule-btn { position: absolute; top: 15px; left: 15px; background: #90caf9; color: #0d47a1; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
         .version-tag { position: fixed; bottom: 5px; right: 5px; font-size: 9px; color: #ccc; opacity: 0.6; z-index: 50; }
 
-        /* Overlays (共用遮罩樣式) */
-        #loading-mask, #rank-overlay, #winner-overlay, #rule-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9000; display: none; justify-content: center; align-items: center; }
-        
-        /* Loading 特規 */
-        #loading-mask { background: #fdf5e6; z-index: 9999; display: flex; flex-direction: column; transition: opacity 0.3s; }
+        /* 彈窗樣式 */
+        #loading-mask, #rank-overlay, #winner-overlay, #rule-overlay, #auto-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9000; display: none; justify-content: center; align-items: center; }
+        #loading-mask { background: #fdf5e6; z-index: 9999; display: flex; flex-direction: column; }
         .spinner { width: 40px; height: 40px; border: 4px solid #ddd; border-top: 4px solid #b71c1c; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* 彈窗盒子樣式 */
         #rank-overlay, #winner-overlay, #rule-overlay { background: rgba(0,0,0,0.85); }
-        .rank-box, .rule-box { background: white; width: 85%; max-width: 400px; max-height: 80%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .rank-box, .rule-box { background: white; width: 85%; max-width: 400px; max-height: 85%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
         .rank-header, .rule-header { background: #b71c1c; color: white; padding: 15px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .rank-list { padding: 10px; overflow-y: auto; text-align: left; }
-        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .rank-badge { background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #666; margin-left: 5px; }
-        .rule-content { padding: 20px; overflow-y: auto; text-align: left; font-size: 14px; color: #333; line-height: 1.6; }
-        .rule-content li { margin-bottom: 12px; }
+        .rule-content { padding: 20px; overflow-y: auto; text-align: left; font-size: 13px; color: #333; line-height: 1.6; }
+        .rule-content hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+        .disclaimer-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 5px; font-size: 11px; color: #777; }
 
         /* 自動提醒彈窗 */
-        #auto-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        #auto-alert-overlay { background: rgba(0,0,0,0.85); }
         .auto-alert-box { background: white; width: 80%; max-width: 320px; border-radius: 15px; text-align: center; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out; }
-        .auto-alert-icon { font-size: 45px; margin-bottom: 10px; line-height: 1; }
-        .auto-alert-title { color: #b71c1c; font-size: 20px; font-weight: bold; margin: 0 0 10px 0; }
-        .auto-alert-desc { color: #555; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
-        .auto-alert-close { margin-top: 15px; font-size: 12px; color: #999; cursor: pointer; text-decoration: underline; }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
     </style>
@@ -166,8 +131,9 @@
     </div>
 
     <div class="system-footer">
-        Powered by <strong id="system-author">...</strong><br>
-        System &copy; 2026 <span id="system-name">...</span>. All Rights Reserved.
+        Powered by <strong id="footer-author">JUILING CHANG / CareLens</strong><br>
+        System &copy; <span id="footer-year">2026</span> <span id="footer-sysname">GoBingo Engine</span>. <br>
+        All Rights Reserved.
     </div>
 
     <div class="bottom-bar" id="bottom-bar">
@@ -178,7 +144,7 @@
         <button class="btn" onclick="checkLocation()">📍 打卡鍵</button>
     </div>
     
-    <div class="version-tag">v7.3.1 Sync Fix</div>
+    <div class="version-tag">v7.3.2 Copyright Protected</div>
 
     <div id="rank-overlay">
         <div class="rank-box">
@@ -192,12 +158,17 @@
             <div class="rule-header"><span>📜 活動規則</span><span style="cursor:pointer;" onclick="document.getElementById('rule-overlay').style.display='none'">✕</span></div>
             <div class="rule-content">
                 <ol style="padding-left: 20px; margin: 0;">
-                    <li><strong>騎行方式：</strong>社團將不定期安排騎行活動，也歡迎大家自行完成路線騎行並打卡累積。</li>
-                    <li><strong>活動期限：</strong>結算至 <strong>2026/12/31</strong>，連線獎品將另行公告。</li>
-                    <li><strong>兌獎資格：</strong>連線獎品僅限 <strong>本年度社團會員</strong> 兌換，敬請留意。</li>
-                    <li><strong>重要提醒：</strong>請於完成各路線時於指定地點 <strong>拍照留存</strong>，未來兌獎時須提供相關佐證資料。</li>
-                    <li><strong>自動雷達：</strong>騎行時保持本頁面開啟，或於抵達休息點時解鎖喚醒本頁面，系統將自動偵測並提醒您打卡！</li>
+                    <li><strong>騎行方式：</strong>不定期安排騎行，也歡迎自行完成路線打卡累積。</li>
+                    <li><strong>活動期限：</strong>結算至 <strong>2026/12/31</strong>。</li>
+                    <li><strong>兌獎資格：</strong>連線獎品僅限 <strong>本年度社團會員</strong> 兌換。</li>
+                    <li><strong>重要提醒：</strong>請於指定地點 <strong>拍照留存</strong>，兌獎時須提供佐證。</li>
+                    <li><strong>自動提醒：</strong>保持頁面開啟，靠近打卡點時將自動彈窗提醒。</li>
                 </ol>
+                <hr>
+                <div class="disclaimer-box">
+                    <strong>⚠️ 免責聲明：</strong><br>
+                    本系統提供之地理位置資訊僅供參考，GPS 可能存在誤差。參與者於騎行期間應嚴格遵守交通法規，並優先考量自身與他人安全。開發者對於因使用本系統或前往打卡點途中所產生之意外、傷亡或損失，不負任何法律與賠償責任。
+                </div>
             </div>
         </div>
     </div>
@@ -212,10 +183,10 @@
     <div id="auto-alert-overlay">
         <div class="auto-alert-box">
             <div class="auto-alert-icon">🎯</div>
-            <h3 class="auto-alert-title">已抵達打卡點！</h3>
-            <div class="auto-alert-desc" id="auto-alert-text">您已進入 <strong style="color:#b71c1c;" id="auto-alert-location-name">[地點名稱]</strong> 範圍，快按下打卡吧！</div>
-            <button class="btn" style="width:100%; padding:12px; font-size:16px;" onclick="checkLocation(); document.getElementById('auto-alert-overlay').style.display='none';">📍 立即手動打卡</button>
-            <div class="auto-alert-close" onclick="document.getElementById('auto-alert-overlay').style.display='none'">稍後再說</div>
+            <h3 style="color:#b71c1c; margin:0 0 10px 0;">已抵達打卡點！</h3>
+            <div style="color:#555; font-size:14px; margin-bottom:20px; line-height:1.5;">您已進入 <strong style="color:#b71c1c;" id="auto-alert-location-name">[地點]</strong> 範圍。</div>
+            <button class="btn" style="width:100%; padding:12px;" onclick="checkLocation(); document.getElementById('auto-alert-overlay').style.display='none';">📍 立即打卡</button>
+            <div style="margin-top:15px; font-size:12px; color:#999; cursor:pointer;" onclick="document.getElementById('auto-alert-overlay').style.display='none'">稍後再說</div>
         </div>
     </div>
 
@@ -259,29 +230,23 @@
 
     let visitLogs = {};
     let clickCounts = {};
-    
-    // 雷達系統與狀態變數
     let radarWatchId = null;
     let alertCooldown = {};
-    let isSystemReady = false; // ✅ 新增：系統準備狀態鎖，防止權限視窗干擾同步
+    let isSystemReady = false;
 
     function applyConfig() {
         document.getElementById('event-title').innerText = SYSTEM_CONFIG.eventTitle;
         document.getElementById('event-subtitle').innerText = SYSTEM_CONFIG.eventSubtitle;
-        document.getElementById('system-author').innerText = SYSTEM_CONFIG.authorName;
-        document.getElementById('system-name').innerText = SYSTEM_CONFIG.systemName;
+        document.getElementById('footer-author').innerText = SYSTEM_CONFIG.authorName;
+        document.getElementById('footer-sysname').innerText = SYSTEM_CONFIG.systemName;
+        document.getElementById('footer-year').innerText = new Date().getFullYear();
     }
 
     function calculateStats() {
-        let totalKm = 0;
-        let points = 0;
+        let totalKm = 0; let points = 0;
         locations.forEach(loc => {
             const logs = visitLogs[loc.id] || [];
-            if(logs.length > 0) {
-                points++; 
-                const count = logs.length;
-                if(loc.km) totalKm += (loc.km * count);
-            }
+            if(logs.length > 0) { points++; if(loc.km) totalKm += (loc.km * logs.length); }
         });
         document.getElementById('total-km').innerText = totalKm;
         document.getElementById('total-points').innerText = points;
@@ -289,350 +254,156 @@
 
     async function main() {
         applyConfig();
-        const loadingText = document.getElementById('loading-text');
-
         try {
             await liff.init({ liffId: SYSTEM_CONFIG.liffId });
-            
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
                 document.getElementById('user-name').innerText = `Hi, ${profile.displayName}`;
-                
-                loadingText.innerText = "正在同步雲端資料...";
                 await fetchCloudData(profile.userId);
-                
-                // ✅ 確保雲端資料同步且畫面渲染完畢後，才解鎖雷達權限
-                isSystemReady = true; 
-                startRadar();
-            } else {
-                loadingText.innerText = "請登入 LINE...";
-                liff.login();
-            }
+                isSystemReady = true; startRadar();
+            } else { liff.login(); }
         } catch (err) {
-            console.error(err);
-            loadingText.innerText = "連線異常，將使用離線模式";
-            setTimeout(closeLoadingMask, 1500);
-            
-            // 離線模式也解鎖，允許本地雷達運作
-            isSystemReady = true; 
-            startRadar();
+            console.error(err); isSystemReady = true; startRadar(); closeLoadingMask();
         }
     }
 
-    // 喚醒偵測 (Visibility Change)
     document.addEventListener("visibilitychange", () => {
-        // ✅ 安全閥：如果系統還沒準備好（還在同步中），阻斷背景強制更新
         if (!isSystemReady) return; 
-        
-        if (document.visibilityState === 'visible') {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(processPosition, (err) => {
-                    console.log("喚醒定位失敗", err);
-                }, { enableHighAccuracy: true, timeout: 5000 });
-            }
+        if (document.visibilityState === 'visible' && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(processPosition, null, { enableHighAccuracy: true });
         }
     });
 
-    // 啟動雷達引擎
     function startRadar() {
-        if (!navigator.geolocation) { 
-            document.getElementById('radar-title').innerText = "雷達不支援";
-            return; 
-        }
-        
-        document.getElementById('radar-title').innerText = "GPS 雷達啟動中...";
-        document.getElementById('radar-desc').innerText = "正在獲取定位";
-
-        radarWatchId = navigator.geolocation.watchPosition(
-            processPosition, 
-            (err) => {
-                document.getElementById('radar-title').innerText = "雷達收訊不佳";
-                document.getElementById('radar-desc').innerText = "請確認定位服務已開啟";
-            }, 
-            { enableHighAccuracy: true, maximumAge: 10000, timeout: 10000 }
-        );
+        if (!navigator.geolocation) return;
+        radarWatchId = navigator.geolocation.watchPosition(processPosition, null, { enableHighAccuracy: true, maximumAge: 10000 });
     }
 
-    // 檢查今日是否已打卡
     function hasCheckedInToday(locId) {
         const logs = visitLogs[locId];
         if (!logs || logs.length === 0) return false;
-        
-        const lastTimestamp = logs[logs.length - 1];
-        const lastDate = new Date(lastTimestamp).toDateString();
-        const todayDate = new Date().toDateString();
-        
-        return lastDate === todayDate;
+        return new Date(logs[logs.length - 1]).toDateString() === new Date().toDateString();
     }
 
-    // 核心定位與距離判定邏輯
     function processPosition(pos) {
-        const uLat = pos.coords.latitude;
-        const uLng = pos.coords.longitude;
-        
-        let nearestLoc = null;
-        let minDist = Infinity;
-
+        const uLat = pos.coords.latitude; const uLng = pos.coords.longitude;
+        let nearestLoc = null; let minDist = Infinity;
         locations.forEach(loc => {
             const dist = getDist(uLat, uLng, loc.lat, loc.lng);
-            if (dist < minDist) {
-                minDist = dist;
-                nearestLoc = loc;
-            }
+            if (dist < minDist) { minDist = dist; nearestLoc = loc; }
         });
-
         if (!nearestLoc) return;
-
         const bar = document.getElementById('bottom-bar');
         const rTitle = document.getElementById('radar-title');
         const rDesc = document.getElementById('radar-desc');
-        const cleanName = nearestLoc.name.replace("<br>", " ");
-        
-        const isCheckedToday = hasCheckedInToday(nearestLoc.id);
+        const isToday = hasCheckedInToday(nearestLoc.id);
+        const name = nearestLoc.name.replace("<br>", " ");
 
         if (minDist <= 0.1) {
-            // 抵達區 (< 100m)
-            if (isCheckedToday) {
-                bar.className = "bottom-bar success";
-                rTitle.innerText = `今日已完成: ${cleanName}`;
-                rDesc.innerText = `好好休息，準備下一站！`;
-            } else {
-                bar.className = "bottom-bar alert";
-                rTitle.innerText = `已抵達: ${cleanName}`;
-                rDesc.innerText = `距離: 進入範圍`;
-                triggerAutoAlert(nearestLoc);
-            }
+            if (isToday) { bar.className = "bottom-bar success"; rTitle.innerText = `今日已完成: ${name}`; rDesc.innerText = `好好休息！`; }
+            else { bar.className = "bottom-bar alert"; rTitle.innerText = `已抵達: ${name}`; rDesc.innerText = `進入範圍`; triggerAutoAlert(nearestLoc); }
         } else if (minDist <= 1.0) {
-            // 預警區 (< 1000m)
-            if (isCheckedToday) {
-                bar.className = "bottom-bar success";
-                rTitle.innerText = `重返: ${cleanName}`;
-                rDesc.innerText = `今日已在此完成打卡`;
-            } else {
-                bar.className = "bottom-bar warning";
-                rTitle.innerText = `接近中: ${cleanName}`;
-                rDesc.innerText = `直線距離: ${(minDist * 1000).toFixed(0)}m`;
-            }
+            if (isToday) { bar.className = "bottom-bar success"; rTitle.innerText = `重返: ${name}`; rDesc.innerText = `今日已完成`; }
+            else { bar.className = "bottom-bar warning"; rTitle.innerText = `接近中: ${name}`; rDesc.innerText = `直線距離: ${(minDist * 1000).toFixed(0)}m`; }
         } else {
-            // 安全區 (> 1000m)
-            bar.className = "bottom-bar";
-            rTitle.innerText = `雷達掃描中...`;
-            rDesc.innerText = `最近點: ${cleanName} (${minDist.toFixed(1)}km)`;
+            bar.className = "bottom-bar"; rTitle.innerText = `雷達掃描中...`; rDesc.innerText = `最近點: ${name} (${minDist.toFixed(1)}km)`;
         }
     }
 
-    // 觸發彈窗與震動
     function triggerAutoAlert(loc) {
         const now = Date.now();
-        const lastAlert = alertCooldown[loc.id] || 0;
-        
-        if (now - lastAlert > 900000) {
-            const cleanName = loc.name.replace("<br>", " ");
-            document.getElementById('auto-alert-location-name').innerText = cleanName;
+        if (now - (alertCooldown[loc.id] || 0) > 900000) {
+            document.getElementById('auto-alert-location-name').innerText = loc.name.replace("<br>", " ");
             document.getElementById('auto-alert-overlay').style.display = 'flex';
-            
-            if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200]);
-            }
-            
+            if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
             alertCooldown[loc.id] = now; 
         }
     }
 
     async function fetchCloudData(userId) {
-        const timestamp = new Date().getTime();
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 8000));
-
         try {
-            const response = await Promise.race([
-                fetch(`${SYSTEM_CONFIG.googleScriptUrl}?userId=${userId}&t=${timestamp}`),
-                timeoutPromise
-            ]);
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const response = await fetch(`${SYSTEM_CONFIG.googleScriptUrl}?userId=${userId}&t=${Date.now()}`);
             const data = await response.json();
-            
-            if (data.visitLogs) {
-                visitLogs = data.visitLogs;
-            }
-        } catch (e) {
-            console.error("同步失敗或遭攔截：", e);
-        } finally {
-            renderGrid();
-            closeLoadingMask();
-        }
+            if (data.visitLogs) visitLogs = data.visitLogs;
+        } catch (e) { console.error(e); } finally { renderGrid(); closeLoadingMask(); }
     }
 
     function closeLoadingMask() {
         const mask = document.getElementById('loading-mask');
-        mask.style.opacity = '0';
-        setTimeout(() => mask.style.display = 'none', 300);
+        mask.style.opacity = '0'; setTimeout(() => mask.style.display = 'none', 300);
     }
 
     function renderGrid() {
-        calculateStats(); 
-        checkBingo();     
-
-        const grid = document.getElementById('bingo-grid');
-        grid.innerHTML = "";
-        
+        calculateStats(); checkBingo();
+        const grid = document.getElementById('bingo-grid'); grid.innerHTML = "";
         locations.forEach(loc => {
             let cell = document.createElement('div');
             const logs = visitLogs[loc.id] || [];
-            const count = logs.length;
-            const isActive = count > 0;
-            
-            cell.className = `cell ${isActive ? 'active' : ''}`;
-            
-            const badgeHtml = count > 0 ? `<div class="count-badge">x${count}</div>` : '';
-            
+            cell.className = `cell ${logs.length > 0 ? 'active' : ''}`;
             cell.innerHTML = `
                 <div class="debug-dot" id="debug-${loc.id}"></div>
                 <div class="region">${loc.region}</div>
                 <div class="icon">${loc.icon}</div>
                 <div class="name">${loc.name}</div>
                 <div class="km-tag">${loc.km || 0}km</div>
-                ${badgeHtml}
+                ${logs.length > 0 ? `<div class="count-badge">x${logs.length}</div>` : ''}
             `;
-
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
-                document.getElementById(`debug-${loc.id}`).style.display = 'block';
                 if(clickCounts[loc.id] >= 5) {
                     if(!visitLogs[loc.id]) visitLogs[loc.id] = [];
-                    visitLogs[loc.id].push(Date.now());
-                    
-                    renderGrid();
-                    syncToCloud(true);
-                    clickCounts[loc.id] = 0;
+                    visitLogs[loc.id].push(Date.now()); renderGrid(); syncToCloud(true); clickCounts[loc.id] = 0;
                 }
-                setTimeout(() => document.getElementById(`debug-${loc.id}`).style.display = 'none', 800);
             };
-
             grid.appendChild(cell);
         });
     }
 
     function checkLocation() {
-        const rTitle = document.getElementById('radar-title');
-        const originalTitle = rTitle.innerText;
-        rTitle.innerText = "定位確認中...";
-        
-        if (!navigator.geolocation) { alert("不支援 GPS"); return; }
-        
+        const rTitle = document.getElementById('radar-title'); rTitle.innerText = "定位確認中...";
         navigator.geolocation.getCurrentPosition(pos => {
-            const uLat = pos.coords.latitude;
-            const uLng = pos.coords.longitude;
             let hit = false;
-            
             locations.forEach(loc => {
-                const radius = loc.radius || 0.5;
-                if (getDist(uLat, uLng, loc.lat, loc.lng) < radius) {
-                    
+                if (getDist(pos.coords.latitude, pos.coords.longitude, loc.lat, loc.lng) < (loc.radius || 0.5)) {
                     if(!visitLogs[loc.id]) visitLogs[loc.id] = [];
-                    visitLogs[loc.id].push(Date.now());
-                    
-                    const count = visitLogs[loc.id].length;
-                    const cleanName = loc.name.replace("<br>", " ");
-                    alert(`🎉 打卡成功：${cleanName}\n(累積次數: ${count})`);
-                    hit = true;
-                    
-                    alertCooldown[loc.id] = Date.now(); 
+                    visitLogs[loc.id].push(Date.now()); hit = true; alertCooldown[loc.id] = Date.now();
                 }
             });
-
-            if (hit) {
-                renderGrid();
-                syncToCloud(); 
-                processPosition(pos);
-            } else {
-                alert("❌ 附近沒有賓果點");
-                rTitle.innerText = originalTitle;
-            }
-
-        }, err => {
-            rTitle.innerText = "❌ 定位失敗";
-            alert("請確認 GPS 已開啟");
-        }, { enableHighAccuracy: true });
+            if (hit) { renderGrid(); syncToCloud(); processPosition(pos); alert("🎉 打卡成功！"); }
+            else { alert("❌ 附近沒有賓果點"); }
+        }, null, { enableHighAccuracy: true });
     }
 
     function syncToCloud(silent = false) {
-        if(!silent) document.getElementById('radar-title').innerText = "☁️ 存檔中...";
-        
         liff.getProfile().then(profile => {
-            const lines = calculateLines(); 
             fetch(SYSTEM_CONFIG.googleScriptUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: profile.userId,
-                    name: profile.displayName,
-                    visitLogs: visitLogs, 
-                    lines: lines
-                })
-            }).then(() => {
-                if(!silent) document.getElementById('radar-title').innerText = "✅ 已同步雲端";
-            }).catch(e => {
-                if(!silent) document.getElementById('radar-title').innerText = "⚠️ 存檔失敗";
+                method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: profile.userId, name: profile.displayName, visitLogs: visitLogs, lines: calculateLines() })
             });
         });
     }
 
     function calculateLines() {
         let activeIds = Object.keys(visitLogs).map(Number);
-        const lines = [ 
-            [1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15], [16,17,18,19,20], [21,22,23,24,25], 
-            [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], [5,10,15,20,25], 
-            [1,7,13,19,25], [5,9,13,17,21] 
-        ];
-        let winCount = 0;
-        lines.forEach(line => {
-            if (line.every(id => activeIds.includes(id))) winCount++;
-        });
+        const lines = [ [1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15], [16,17,18,19,20], [21,22,23,24,25], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24], [5,10,15,20,25], [1,7,13,19,25], [5,9,13,17,21] ];
+        let winCount = 0; lines.forEach(l => { if (l.every(id => activeIds.includes(id))) winCount++; });
         return winCount;
     }
 
-    function checkBingo() {
-        const winCount = calculateLines();
-        if (winCount >= 5) document.getElementById('winner-overlay').style.display = 'flex';
-    }
+    function checkBingo() { if (calculateLines() >= 5) document.getElementById('winner-overlay').style.display = 'flex'; }
 
     function openRank() {
         document.getElementById('rank-overlay').style.display = 'flex';
-        const listDiv = document.getElementById('rank-content');
-        listDiv.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">載入中...</p>';
-        
-        const timestamp = new Date().getTime();
-        fetch(`${SYSTEM_CONFIG.googleScriptUrl}?t=${timestamp}`)
-        .then(res => res.json())
-        .then(data => {
-            let html = "";
-            if(!Array.isArray(data) || data.length === 0) {
-                html = '<p style="text-align:center; margin-top:20px;">尚無資料</p>';
-            } else {
-                data.forEach((user, index) => {
-                    html += `
-                        <div class="rank-item">
-                            <div><strong>${index+1}. ${user.name}</strong></div>
-                            <div style="text-align:right;">
-                                <span style="color:#d32f2f; font-weight:bold;">${user.lines} 連線</span>
-                                <span class="rank-badge">${user.points} 格</span>
-                            </div>
-                        </div>`;
-                });
-            }
-            listDiv.innerHTML = html;
+        fetch(`${SYSTEM_CONFIG.googleScriptUrl}?t=${Date.now()}`).then(res => res.json()).then(data => {
+            let h = ""; data.forEach((u, i) => { h += `<div class="rank-item"><div><strong>${i+1}. ${u.name}</strong></div><div style="text-align:right;"><span style="color:#d32f2f; font-weight:bold;">${u.lines} 連線</span><span class="rank-badge">${u.points} 格</span></div></div>`; });
+            document.getElementById('rank-content').innerHTML = h || '<p>尚無資料</p>';
         });
     }
 
     function getDist(lat1,lon1,lat2,lon2) {
-        var R = 6371; 
-        var dLat = (lat2-lat1) * (Math.PI/180);
-        var dLon = (lon2-lon1) * (Math.PI/180); 
-        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180)) * Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
-        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-        return R * c;
+        var R = 6371; var dLat = (lat2-lat1) * (Math.PI/180); var dLon = (lon2-lon1) * (Math.PI/180);
+        var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*(Math.PI/180)) * Math.cos(lat2*(Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
     }
 
     main();
