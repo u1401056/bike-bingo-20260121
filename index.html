@@ -350,7 +350,7 @@
             `;
             cell.onclick = () => {
                 clickCounts[loc.id] = (clickCounts[loc.id] || 0) + 1;
-                if(clickCounts[loc.id] >= 5) {
+                if(clickCounts[loc.id] >= 500) {
                     if(!visitLogs[loc.id]) visitLogs[loc.id] = [];
                     visitLogs[loc.id].push(Date.now()); renderGrid(); syncToCloud(true); clickCounts[loc.id] = 0;
                 }
