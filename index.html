@@ -90,6 +90,13 @@
         .rule-content hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
         .disclaimer-box { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 5px; font-size: 11px; color: #777; }
 
+        /* 戰績榜清單 */
+        .rank-list { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .rank-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 15px; border-bottom: 1px solid #eee; text-align: left; }
+        .rank-item > div:first-child { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rank-item > div:last-child { flex-shrink: 0; white-space: nowrap; font-size: 13px; }
+        .rank-badge { display: inline-block; margin-left: 8px; padding: 1px 8px; font-size: 11px; color: #b71c1c; background: #fdf5e6; border-radius: 10px; }
+
         /* 自動提醒彈窗 */
         #auto-alert-overlay { background: rgba(0,0,0,0.85); }
         .auto-alert-box { background: white; width: 80%; max-width: 320px; border-radius: 15px; text-align: center; padding: 25px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); animation: popIn 0.3s ease-out; }
